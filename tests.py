@@ -25,6 +25,11 @@ class RoomTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.new_living_space.create_new("Test")
 
+    def test_only_accepts_string_input(self):
+        with self.assertRaises(TypeError):
+            self.new_living_space.create_new(12345)
+            self.new_office.create_new(12345)
+
 
 class PersonTests(unittest.TestCase):
     def setUp(self):
@@ -48,3 +53,8 @@ class PersonTests(unittest.TestCase):
     def test_does_not_allow_duplicate_staff(self):
         with self.assertRaises(ValueError):
             self.new_staff.add("Severus Snape")
+
+    def test_only_accepts_string_input(self):
+        with self.assertRaises(TypeError):
+            self.new_fellow.add(12345)
+            self.new_staff.add(12345)
