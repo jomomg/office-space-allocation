@@ -46,14 +46,6 @@ class PersonTests(unittest.TestCase):
         self.assertEqual(self.new_staff.all_staff.count("Severus Snape"), 1,
                          "A new staff member was not added")
 
-    def test_does_not_allow_duplicate_fellows(self):
-        with self.assertRaises(ValueError):
-            self.new_fellow.add("Harry Potter")
-
-    def test_does_not_allow_duplicate_staff(self):
-        with self.assertRaises(ValueError):
-            self.new_staff.add("Severus Snape")
-
     def test_only_accepts_string_input(self):
         with self.assertRaises(TypeError):
             self.new_fellow.add(12345)
