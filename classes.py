@@ -3,20 +3,23 @@ from models import Model
 
 class Dojo:
     def __init__(self):
+        self.name = None
+        self.current_capacity = 0
+
+    def allocate(self):
         pass
 
 
 class Person:
     def __init__(self):
-        pass
+        self.name = None
+        self.current_office = None
 
 
 class Fellow(Person):
     def __init__(self):
         Person.__init__(self)
         self.model = Model()
-        self.name = None
-        self.current_office = None
         self.current_living_space = None
 
     def add(self, new_fellow):
@@ -70,12 +73,17 @@ class Office(Dojo):
 
         if not isinstance(new_office, str):
             raise TypeError("Input is not a string")
-        offices = Model.return_list(list_to_be_returned="offices")
 
+        self.name = new_office
+        new_entry = [self.name, self.current_capacity]
+
+        # get the existing offices
+        offices = Model.return_list(list_to_be_returned="offices")
         # check whether the office already exists, if it does raise an exception
-        if offices.count(new_office) == 1:
-            raise ValueError("Office already exists")
-        self.model.update(new_office, list_to_be_appended="offices")
+        for entry in offices:
+            if entry.count(self.name) == 1:
+                raise ValueError("Office already exists")
+        self.model.update(new_entry, list_to_be_appended="offices")
 
     @property
     def all_offices(self):
@@ -92,13 +100,16 @@ class LivingSpace(Dojo):
     def create_new(self, new_living_space):
         """ Creates a new living space """
 
+        self.name = new_living_space
+        new_entry = [self.name, self.current_capacity]
         living_spaces = Model.return_list(list_to_be_returned="living_spaces")
 
         # check whether the living space already exists, if it does raise an exception
-        if living_spaces.count(new_living_space) == 1:
-            raise ValueError("Living space already exists")
+        for entry in living_spaces:
+            if entry.count(self.name) == 1:
+                raise ValueError("Living space already exists")
         # create new living space
-        self.model.update(new_living_space, list_to_be_appended="living_spaces")
+        self.model.update(new_entry, list_to_be_appended="living_spaces")
 
     @property
     def all_living_spaces(self):
