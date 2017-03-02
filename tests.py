@@ -3,6 +3,13 @@ from classes import Fellow, Staff, Office, LivingSpace
 
 
 class RoomTests(unittest.TestCase):
+    """Tests to ensure proper living space and office creation
+
+       These tests assume that the 'all_offices' and 'all_living_spaces' methods return a list.
+       Hence the 'count' method of the list object is used to test
+       Whether a new office  or a new living space exists in the list returned.
+    """
+
     def setUp(self):
         self.new_office = Office()
         self.new_living_space = LivingSpace()
@@ -32,6 +39,13 @@ class RoomTests(unittest.TestCase):
 
 
 class PersonTests(unittest.TestCase):
+    """Tests to ensure proper fellow and staff addition
+
+       These tests assume that the 'all_staff' and 'all_fellows' methods return a list.
+       Hence the 'count' method of the list object is used to test
+       Whether a new fellow  or a new staff member exists in the list returned.
+     """
+
     def setUp(self):
         self.new_fellow = Fellow()
         self.new_staff = Staff()
