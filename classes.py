@@ -44,7 +44,7 @@ class Staff(Person):
 
     @property
     def all_staff(self):
-        """ Returns a list containing all added members of staff """
+        """ Returns a list containing all added members of staff"""
 
         return Model.return_list(list_to_be_returned="staff")
 
