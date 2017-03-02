@@ -15,13 +15,17 @@ class RoomTests(unittest.TestCase):
         self.new_living_space = LivingSpace()
 
     def test_create_new_office(self):
+        initial_office_count = len(self.new_office.all_offices)
         self.new_office.create_new("Test")
-        self.assertEqual(self.new_office.all_offices.count("Test"), 1,
+        new_office_count = len(self.new_office.all_offices)
+        self.assertEqual(new_office_count - initial_office_count, 1,
                          "A new office was not created")
 
     def test_create_new_living_space(self):
+        initial_living_space_count = len(self.new_living_space.all_living_spaces)
         self.new_living_space.create_new("Test")
-        self.assertEqual(self.new_living_space.all_living_spaces.count("Test"), 1,
+        new_living_space_count = len(self.new_living_space.all_living_spaces)
+        self.assertEqual(new_living_space_count - initial_living_space_count, 1,
                          "A new living space was not created")
 
     def test_does_not_allow_duplicate_offices(self):
@@ -51,13 +55,17 @@ class PersonTests(unittest.TestCase):
         self.new_staff = Staff()
 
     def test_add_new_fellow(self):
+        initial_fellow_count = len(self.new_fellow.all_fellows)
         self.new_fellow.add("Harry Potter")
-        self.assertEqual(self.new_fellow.all_fellows.count("Harry Potter"), 1,
+        new_fellow_count = len(self.new_fellow.all_fellows)
+        self.assertEqual(new_fellow_count - initial_fellow_count, 1,
                          "A new fellow was not added")
 
     def test_add_new_staff(self):
+        initial_staff_count = len(self.new_staff.all_staff)
         self.new_staff.add("Severus Snape")
-        self.assertEqual(self.new_staff.all_staff.count("Severus Snape"), 1,
+        new_staff_count = len(self.new_staff.all_staff)
+        self.assertEqual(new_staff_count - initial_staff_count, 1,
                          "A new staff member was not added")
 
     def test_only_accepts_string_input(self):
