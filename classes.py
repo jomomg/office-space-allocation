@@ -15,13 +15,19 @@ class Fellow(Person):
     def __init__(self):
         Person.__init__(self)
         self.model = Model()
+        self.name = None
+        self.current_office = None
+        self.current_living_space = None
 
     def add(self, new_fellow):
         """ Adds a new fellow """
 
         if not isinstance(new_fellow, str):
             raise TypeError("Input is not a string")
-        self.model.update(new_fellow, list_to_be_appended="fellows")
+
+        self.name = new_fellow
+        new_entry = [self.name, self.current_office, self.current_living_space]
+        self.model.update(new_entry, list_to_be_appended="fellows")
 
     @property
     def all_fellows(self):
@@ -34,13 +40,18 @@ class Staff(Person):
     def __init__(self):
         Person.__init__(self)
         self.model = Model()
+        self.name = None
+        self.current_office = None
 
     def add(self, new_staff):
         """ Adds a new member of staff """
 
         if not isinstance(new_staff, str):
             raise TypeError("Input is not a string")
-        self.model.update(new_staff, list_to_be_appended="staff")
+
+        self.name = new_staff
+        new_entry = [self.name, self.current_office]
+        self.model.update(new_entry, list_to_be_appended="staff")
 
     @property
     def all_staff(self):
