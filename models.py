@@ -6,6 +6,8 @@ living_spaces = list()
 
 
 class Model:
+    """ Contains the methods for accessing the storage lists"""
+
     def __init__(self):
         self.fellows = fellows
         self.staff = staff
@@ -13,6 +15,8 @@ class Model:
         self.living_spaces = living_spaces
 
     def update(self, item_to_add, list_to_be_appended):
+        """ Updates a new item to the selected list"""
+
         successful = True
 
         if list_to_be_appended == "fellows":
@@ -32,6 +36,8 @@ class Model:
 
     @staticmethod
     def return_list(list_to_be_returned):
+        """ Returns the selected list"""
+
         found = True
 
         if list_to_be_returned == "fellows":
