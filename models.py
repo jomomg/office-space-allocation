@@ -53,20 +53,20 @@ class Model:
 
     @staticmethod
     def get_fellow(fellow_name):
-        """ Return a list containing the details of the specified fellow"""
+        """ Return a dictionary containing the details of the specified fellow"""
         found = True
-        for record in fellows:
-            if record[0] == fellow_name:
-                return record
+        for item in fellows:
+            if item["name"] == fellow_name:
+                return item
         return not found
 
     @staticmethod
     def get_staff(staff_name):
-        """ Return a list containing the details of the specified staff"""
+        """ Return a dictionary item containing the details of the specified staff"""
         found = True
-        for record in staff:
-            if record[0] == staff_name:
-                return record
+        for item in staff:
+            if item["name"] == staff_name:
+                return item
         return not found
 
 
