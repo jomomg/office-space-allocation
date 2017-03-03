@@ -51,6 +51,25 @@ class Model:
         else:
             return not found
 
+    @staticmethod
+    def get_fellow(fellow_name):
+        """ Return a list containing the details of the specified fellow"""
+        found = True
+        for record in fellows:
+            if record[0] == fellow_name:
+                return record
+        return not found
+
+    @staticmethod
+    def get_staff(staff_name):
+        """ Return a list containing the details of the specified staff"""
+        found = True
+        for record in staff:
+            if record[0] == staff_name:
+                return record
+        return not found
+
+
 
 
 
