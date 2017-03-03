@@ -23,7 +23,9 @@ class Dojo:
         # return the list of available offices
         offices = Model.return_list(list_to_be_returned="offices")
         # return a list of offices with capacity to spare
-        non_full_offices = [x for x in offices if x[1] < MAX_OFFICE_CAP]
+        non_full_offices = [x for x in offices if x["current_capacity"] < MAX_OFFICE_CAP]
+        if not non_full_offices:
+            raise ValueError("There are no offices to allocate")
 
         if person_type == "fellow":
             # get a random office from the list of non full offices
@@ -31,9 +33,9 @@ class Dojo:
             # get the fellow with the given name
             fellow = Model.get_fellow(person_name)
             # increment the current capacity of the chosen office by 1
-            random_office[1] += 1
+            random_office["current_capacity"] += 1
             # add the office name to be the fellow's current office
-            fellow[1] = random_office[0]
+            fellow["current_office"] = random_office["name"]
             return successful
 
         elif person_type == "staff":
@@ -42,9 +44,9 @@ class Dojo:
             # get the staff member with the given name
             staff = Model.get_staff(person_name)
             # increment the current capacity of the chosen office by 1
-            random_office[1] += 1
+            random_office["current_capacity"] += 1
             # add the office name to be the staff member's current office
-            staff[1] = random_office[0]
+            staff["current_office"] = random_office["name"]
             return successful
 
         else:
@@ -58,19 +60,23 @@ class Dojo:
         """
 
         successful = True
+        random.seed()
 
         # return a list of available living spaces
         living_spaces = Model.return_list(list_to_be_returned="living_spaces")
         # return a list of living spaces with capacity to spare
-        non_full_living_spaces = [x for x in living_spaces if x[1] < MAX_OFFICE_CAP]
+        non_full_living_spaces = [x for x in living_spaces if x["current_capacity"] < MAX_LIVING_SPACE_CAP]
+
+        if not non_full_living_spaces:
+            raise ValueError("There are no living spaces to allocate")
         # get a random living space
         random_living_space = random.choice(non_full_living_spaces)
         # get the fellow specified
         fellow = Model.get_fellow(fellow_name)
         # increment the current capacity of the living space by 1
-        random_living_space[1] += 1
+        random_living_space["current_capacity"] += 1
         # add the living space's name to the fellows current living space
-        fellow[2] = random_living_space[0]
+        fellow["current_living_space"] = random_living_space["name"]
 
         return successful
 
@@ -85,12 +91,12 @@ class Person:
 
         if person_type == "fellow":
             fellow = Model.get_fellow(person_name)
-            self.current_office = fellow[1]
+            self.current_office = fellow["current_office"]
             return self.current_office
 
         elif person_type == "staff":
             staff = Model.get_staff(person_name)
-            self.current_office = staff[1]
+            self.current_office = staff["current_office"]
             return self.current_office
 
 
@@ -107,7 +113,10 @@ class Fellow(Person):
             raise TypeError("Input is not a string")
 
         self.name = new_fellow
-        new_entry = [self.name, self.current_office, self.current_living_space]
+        new_entry = {"name": self.name,
+                     "current_office": self.current_office,
+                     "current_living_space": self.current_living_space}
+
         self.model.update(new_entry, list_to_be_appended="fellows")
 
     @property
@@ -120,7 +129,8 @@ class Fellow(Person):
         """ Returns the current living space of the specified fellow"""
 
         fellow = Model.get_fellow(fellow_name)
-        self.current_living_space = fellow[2]
+        self.current_living_space = fellow["current_living_space"]
+        return self.current_living_space
 
 
 class Staff(Person):
@@ -137,7 +147,7 @@ class Staff(Person):
             raise TypeError("Input is not a string")
 
         self.name = new_staff
-        new_entry = [self.name, self.current_office]
+        new_entry = {"name": self.name, "current_office": self.current_office}
         self.model.update(new_entry, list_to_be_appended="staff")
 
     @property
@@ -160,17 +170,16 @@ class Office(Dojo):
             raise TypeError("Input is not a string")
 
         self.name = new_office
-        new_entry = [self.name, self.current_capacity]
+        new_entry = {"name": self.name, "current_capacity": self.current_capacity}
 
         # get the existing offices
         offices = Model.return_list(list_to_be_returned="offices")
         # check whether the office already exists, if it does raise an exception
         for entry in offices:
-            if entry.count(self.name) == 1:
+            if entry["name"] == self.name:
                 raise ValueError("Office already exists")
         self.model.update(new_entry, list_to_be_appended="offices")
         return successful
-
 
     @property
     def all_offices(self):
@@ -189,12 +198,13 @@ class LivingSpace(Dojo):
 
         successful = True
         self.name = new_living_space
-        new_entry = [self.name, self.current_capacity]
-        living_spaces = Model.return_list(list_to_be_returned="living_spaces")
+        new_entry = {"name": self.name, "current_capacity": self.current_capacity}
 
+        # get the existing living_spaces
+        living_spaces = Model.return_list(list_to_be_returned="living_spaces")
         # check whether the living space already exists, if it does raise an exception
         for entry in living_spaces:
-            if entry.count(self.name) == 1:
+            if entry["name"] == self.name:
                 raise ValueError("Living space already exists")
         # create new living space
         self.model.update(new_entry, list_to_be_appended="living_spaces")
