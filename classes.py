@@ -6,6 +6,8 @@ MAX_LIVING_SPACE_CAP = 4
 
 
 class Dojo:
+    """This class contains the methods and attributes common to the Office and LivingSpace classes"""
+
     def __init__(self):
         self.name = None
         self.current_capacity = 0
@@ -82,6 +84,8 @@ class Dojo:
 
 
 class Person:
+    """This class contains the methods and attributes common to the Fellow and Staff classes"""
+
     def __init__(self):
         self.name = None
         self.current_office = None
@@ -109,14 +113,12 @@ class Fellow(Person):
     def add(self, new_fellow):
         """ Adds a new fellow """
 
-        if not isinstance(new_fellow, str):
-            raise TypeError("Input is not a string")
-
         self.name = new_fellow
+        # store the new fellow as a dictionary entry
         new_entry = {"name": self.name,
                      "current_office": self.current_office,
                      "current_living_space": self.current_living_space}
-
+        # append the new entry to the fellows list
         self.model.update(new_entry, list_to_be_appended="fellows")
 
     @property
@@ -143,11 +145,10 @@ class Staff(Person):
     def add(self, new_staff):
         """ Adds a new member of staff """
 
-        if not isinstance(new_staff, str):
-            raise TypeError("Input is not a string")
-
         self.name = new_staff
+        # store the new staff member as a dictionary entry
         new_entry = {"name": self.name, "current_office": self.current_office}
+        # append the new entry to the staff list
         self.model.update(new_entry, list_to_be_appended="staff")
 
     @property
@@ -158,6 +159,8 @@ class Staff(Person):
 
 
 class Office(Dojo):
+    """Subclass of Dojo. Contains methods for creating a new office and returning all offices created"""
+
     def __init__(self):
         Dojo.__init__(self)
         self.model = Model()
@@ -166,9 +169,6 @@ class Office(Dojo):
         """ Creates a new office """
 
         successful = True
-        if not isinstance(new_office, str):
-            raise TypeError("Input is not a string")
-
         self.name = new_office
         new_entry = {"name": self.name, "current_capacity": self.current_capacity}
 
@@ -189,6 +189,10 @@ class Office(Dojo):
 
 
 class LivingSpace(Dojo):
+    """Subclass of the Dojo class. Contains methods for creating a new living space and
+       returning all living spaces
+    """
+
     def __init__(self):
         Dojo.__init__(self)
         self.model = Model()
