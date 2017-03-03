@@ -2,8 +2,7 @@
 
    Usage:
        app.py create_room <room_type> <room_name>
-       app.py add_person  (fellow|staff) <person_name> [-y]
-       app.py do_something <something>
+       app.py add_person (fellow|staff) <person_name> [-y]
 
    Options:
        -y    wants accommodation
