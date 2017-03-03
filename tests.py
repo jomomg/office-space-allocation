@@ -1,5 +1,6 @@
 import unittest
 from classes import Fellow, Staff, Office, LivingSpace
+from models import Model
 
 
 class RoomTests(unittest.TestCase):
@@ -11,6 +12,8 @@ class RoomTests(unittest.TestCase):
     def setUp(self):
         self.new_office = Office()
         self.new_living_space = LivingSpace()
+        self.new_fellow = Fellow()
+        self.new_staff = Staff()
 
     def test_create_new_office(self):
         initial_office_count = len(self.new_office.all_offices)
@@ -34,10 +37,40 @@ class RoomTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.new_living_space.create_new("Test")
 
-    def test_only_accepts_string_input(self):
-        with self.assertRaises(TypeError):
-            self.new_living_space.create_new(12345)
-            self.new_office.create_new(12345)
+    def test_allocate_office(self):
+        # add a new fellow and a new staff member
+        self.new_fellow.add("Test Fellow")
+        self.new_staff.add("Test Staff")
+        # create a new office
+        self.new_office.create_new("Red")
+        # allocate them an office space
+        self.new_office.allocate_office_space("Test Fellow", "fellow")
+        self.new_office.allocate_office_space("Test Staff", "staff")
+        # get the office they have been allocated
+        fellow_office = self.new_fellow.get_current_office("Test Fellow", "fellow")
+        staff_office = self.new_staff.get_current_office("Test Staff", "staff")
+        # check if it is the correct living space
+        self.assertEqual((fellow_office, staff_office), ("Red", "Red"),
+                         "Office allocation not successful")
+        # check if the office capacity is correct
+        office_to_check = Model.get_office("Red")
+        self.assertEqual(office_to_check["current_capacity"], 2,
+                         "Office allocation not successful")
+
+    def test_allocate_living_space(self):
+        # add a new fellow
+        self.new_fellow.add("Test Fellow 2")
+        # create a new living space
+        self.new_living_space.create_new("Blue")
+        # allocate the fellow a living space
+        self.new_living_space.allocate_living_space("Test Fellow 2")
+        # get the living space the fellow has been allocated
+        living_space_alloc = self.new_fellow.get_current_living_space("Test Fellow 2")
+        # check whether it is the correct living space
+        self.assertEqual(living_space_alloc, "Blue")
+        # check whether the capacity is correct
+        living_space_to_check = Model.get_living_space("Blue")
+        self.assertEqual(living_space_to_check["current_capacity"], 1)
 
 
 class PersonTests(unittest.TestCase):
@@ -64,7 +97,3 @@ class PersonTests(unittest.TestCase):
         self.assertEqual(new_staff_count - initial_staff_count, 1,
                          "A new staff member was not added")
 
-    def test_only_accepts_string_input(self):
-        with self.assertRaises(TypeError):
-            self.new_fellow.add(12345)
-            self.new_staff.add(12345)
