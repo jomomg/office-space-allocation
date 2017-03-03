@@ -67,15 +67,17 @@ class Arguments(cmd.Cmd):
             print("Fellow {} has been successfully added".format(person_name))
             try:
                 classes.Office.allocate_office_space(person_name, person_type="fellow")
-                print("{} has been allocated the office {}".format(person_name, new_fellow.get_current_office(
+                print("{} has been allocated the office {}".format(person_name,
+                                                                   new_fellow.get_current_office(
                                                                        person_name, "fellow")))
             except ValueError as e:
                 print(e)
 
             try:
                 classes.Office.allocate_living_space(person_name)
-                print("{} has been allocated the living space {}".format(person_name, new_fellow.get_current_living_space(
-                                                                         person_name)))
+                print("{} has been allocated the living space {}".format(person_name,
+                                                                         new_fellow.get_current_living_space(
+                                                                             person_name)))
             except ValueError as e:
                 print(e)
 
@@ -84,7 +86,8 @@ class Arguments(cmd.Cmd):
             print("Fellow {} has been successfully added".format(person_name))
             try:
                 classes.Office.allocate_office_space(person_name, person_type="fellow")
-                print("{} has been allocated the office {}".format(person_name, new_fellow.get_current_office(
+                print("{} has been allocated the office {}".format(person_name,
+                                                                   new_fellow.get_current_office(
                                                                        person_name, "fellow")))
             except ValueError as e:
                 print(e)
@@ -98,15 +101,11 @@ class Arguments(cmd.Cmd):
             print("Staff {} has been successfully added".format(person_name))
             try:
                 classes.Office.allocate_office_space(person_name, person_type="staff")
-                print("{} has been allocated the office {}".format(person_name, new_staff.get_current_office(
+                print("{} has been allocated the office {}".format(person_name,
+                                                                   new_staff.get_current_office(
                                                                        person_name, "staff")))
             except ValueError as e:
                 print(e)
-
-    @docopt_cmd
-    def do_something(self, arg):
-        """Usage: do_something <something>"""
-        print("doing {}".format(arg["<something>"]))
 
 
 if __name__ == '__main__':
