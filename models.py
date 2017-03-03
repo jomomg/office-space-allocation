@@ -69,6 +69,24 @@ class Model:
                 return item
         return not found
 
+    @staticmethod
+    def get_office(office_name):
+        """ Return a dictionary item with the details of the specified office"""
+        found = True
+        for item in offices:
+            if item["name"] == office_name:
+                return item
+        return not found
+
+    @staticmethod
+    def get_living_space(living_space_name):
+        """ Return a dictionary item with the details of the specified living space"""
+        found = True
+        for item in living_spaces:
+            if item["name"] == living_space_name:
+                return item
+        return not found
+
 
 
 
