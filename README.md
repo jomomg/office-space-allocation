@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/jomomg/office-space-allocation.svg?branch=develop)](https://travis-ci.org/jomomg/office-space-allocation)
+[![Build Status](https://travis-ci.org/jomomg/office-space-allocation.svg?branch=topic-review)](https://travis-ci.org/jomomg/office-space-allocation)
 
 # Office Space Allocation App
    This application is used to assign a new Fellow or Staff member an office space upon joining Andela. The application can also assign a    living space to a new fellow if they opt to have one.
