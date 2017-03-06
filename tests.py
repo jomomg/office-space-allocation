@@ -1,5 +1,6 @@
 import unittest
-from classes import Fellow, Staff, Office, LivingSpace
+from person import Fellow, Staff
+from dojo import Office, LivingSpace
 from models import Model
 
 
