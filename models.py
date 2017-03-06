@@ -1,4 +1,4 @@
-
+"""lists for storing data"""
 fellows = list()
 staff = list()
 offices = list()
@@ -35,7 +35,7 @@ class Model:
             return not successful
 
     @staticmethod
-    def return_list(list_to_be_returned):
+    def get_list(list_to_be_returned):
         """ Returns the selected list"""
 
         found = True
