@@ -1,8 +1,8 @@
 """lists for storing data"""
-fellows = list()
-staff = list()
-offices = list()
-living_spaces = list()
+fellows = []
+staff = []
+offices = []
+living_spaces = []
 
 
 class Model:
