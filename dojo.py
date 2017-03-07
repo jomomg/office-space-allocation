@@ -5,7 +5,7 @@ MAX_OFFICE_CAP = 6
 MAX_LIVING_SPACE_CAP = 4
 
 
-class Dojo:
+class Room:
     """This class contains the methods and attributes common to the Office and LivingSpace classes"""
 
     def __init__(self):
@@ -32,24 +32,16 @@ class Dojo:
             raise ValueError("There are no offices to allocate")
 
         if person_type == "fellow":
-            # get a random office from the list of non full offices
             random_office = random.choice(non_full_offices)
-            # get the fellow with the given name
             fellow = Model.get_fellow(person_name)
-            # increment the current capacity of the chosen office by 1
             random_office["current_capacity"] += 1
-            # add the office name to be the fellow's current office
             fellow["current_office"] = random_office["name"]
             return successful
 
         elif person_type == "staff":
-            # get a random office from the list of non full offices
             random_office = random.choice(non_full_offices)
-            # get the staff member with the given name
             staff = Model.get_staff(person_name)
-            # increment the current capacity of the chosen office by 1
             random_office["current_capacity"] += 1
-            # add the office name to be the staff member's current office
             staff["current_office"] = random_office["name"]
             return successful
 
@@ -75,23 +67,19 @@ class Dojo:
 
         if not non_full_living_spaces:
             raise ValueError("There are no living spaces to allocate")
-        # get a random living space
         random_living_space = random.choice(non_full_living_spaces)
-        # get the fellow specified
         fellow = Model.get_fellow(fellow_name)
-        # increment the current capacity of the living space by 1
         random_living_space["current_capacity"] += 1
-        # add the living space's name to the fellows current living space
         fellow["current_living_space"] = random_living_space["name"]
 
         return successful
 
 
-class Office(Dojo):
-    """Subclass of Dojo. Contains methods for creating a new office and returning all offices created"""
+class Office(Room):
+    """Subclass of Room. Contains methods for creating a new office and returning all offices created"""
 
     def __init__(self):
-        Dojo.__init__(self)
+        Room.__init__(self)
         self.model = Model()
 
     def create_new(self, new_office):
@@ -117,13 +105,13 @@ class Office(Dojo):
         return Model.get_list("offices")
 
 
-class LivingSpace(Dojo):
-    """Subclass of the Dojo class. Contains methods for creating a new living space and
+class LivingSpace(Room):
+    """Subclass of the Room class. Contains methods for creating a new living space and
        returning all living spaces
     """
 
     def __init__(self):
-        Dojo.__init__(self)
+        Room.__init__(self)
         self.model = Model()
 
     def create_new(self, new_living_space):
