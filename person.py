@@ -1,4 +1,5 @@
 from models import Model
+import dojo
 
 
 class Person:
@@ -28,7 +29,7 @@ class Fellow(Person):
         self.model = Model()
         self.current_living_space = None
 
-    def add(self, new_fellow):
+    def add(self, new_fellow, wants_accommodation=False):
         """ Adds a new fellow """
 
         self.name = new_fellow
@@ -36,8 +37,22 @@ class Fellow(Person):
         new_entry = {"name": self.name,
                      "current_office": self.current_office,
                      "current_living_space": self.current_living_space}
-        # append the new entry to the fellows list
         self.model.update(new_entry, "fellows")
+        print("Fellow {} has been successfully added".format(self.name))
+        try:
+            dojo.Office.allocate_office_space(self.name, person_type="fellow")
+            print("{} has been allocated the office {}"
+                  .format(self.name, self.get_current_office(self.name, "fellow")))
+        except ValueError as e:
+                print(e)
+
+        if wants_accommodation:
+            try:
+                dojo.Office.allocate_living_space(self.name)
+                print("{} has been allocated the living space {}"
+                      .format(self.name, self.get_current_living_space(self.name)))
+            except ValueError as e:
+                print(e)
 
     @property
     def all_fellows(self):
@@ -67,6 +82,13 @@ class Staff(Person):
         new_entry = {"name": self.name, "current_office": self.current_office}
         # append the new entry to the staff list
         self.model.update(new_entry, "staff")
+        print("Staff {} has been successfully added".format(self.name))
+        try:
+            dojo.Office.allocate_office_space(self.name, person_type="staff")
+            print("{} has been allocated the office {}"
+                  .format(self.name, self.get_current_office(self.name, "staff")))
+        except ValueError as e:
+            print(e)
 
     @property
     def all_staff(self):
