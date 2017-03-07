@@ -67,44 +67,16 @@ class Arguments(cmd.Cmd):
         person_name = " ".join(arg["<person_name>"])
 
         if arg["fellow"] and arg["-y"]:
-            new_fellow.add(person_name)
-            print("Fellow {} has been successfully added".format(person_name))
-            try:
-                dojo.Office.allocate_office_space(person_name, person_type="fellow")
-                print("{} has been allocated the office {}"
-                      .format(person_name, new_fellow.get_current_office(person_name, "fellow")))
-            except ValueError as e:
-                print(e)
-
-            try:
-                dojo.Office.allocate_living_space(person_name)
-                print("{} has been allocated the living space {}"
-                      .format(person_name, new_fellow.get_current_living_space(person_name)))
-            except ValueError as e:
-                print(e)
+            new_fellow.add(person_name, wants_accommodation=True)
 
         elif arg["fellow"]:
             new_fellow.add(person_name)
-            print("Fellow {} has been successfully added".format(person_name))
-            try:
-                dojo.Office.allocate_office_space(person_name, person_type="fellow")
-                print("{} has been allocated the office {}"
-                      .format(person_name, new_fellow.get_current_office(person_name, "fellow")))
-            except ValueError as e:
-                print(e)
 
         elif arg["staff"] and arg["-y"]:
             print("Staff cannot be allocated a living space")
 
         elif arg["staff"]:
             new_staff.add(person_name)
-            print("Staff {} has been successfully added".format(person_name))
-            try:
-                dojo.Office.allocate_office_space(person_name, person_type="staff")
-                print("{} has been allocated the office {}"
-                      .format(person_name, new_staff.get_current_office(person_name, "staff")))
-            except ValueError as e:
-                print(e)
 
     @docopt_cmd
     def do_quit(self, arg):
