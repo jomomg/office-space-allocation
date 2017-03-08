@@ -55,42 +55,34 @@ class Model:
     def get_fellow(fellow_name):
         """ Return a dictionary containing the details of the specified fellow"""
         found = True
-        for item in fellows:
-            if item["name"] == fellow_name:
-                return item
+        for fellow in fellows:
+            if fellow.name == fellow_name:
+                return fellow
         return not found
 
     @staticmethod
     def get_staff(staff_name):
         """ Return a dictionary item containing the details of the specified staff"""
         found = True
-        for item in staff:
-            if item["name"] == staff_name:
-                return item
+        for staff_member in staff:
+            if staff_member.name == staff_name:
+                return staff_member
         return not found
 
     @staticmethod
     def get_office(office_name):
         """ Return a dictionary item with the details of the specified office"""
         found = True
-        for item in offices:
-            if item["name"] == office_name:
-                return item
+        for office in offices:
+            if office.name == office_name:
+                return office
         return not found
 
     @staticmethod
     def get_living_space(living_space_name):
         """ Return a dictionary item with the details of the specified living space"""
         found = True
-        for item in living_spaces:
-            if item["name"] == living_space_name:
-                return item
+        for living_space in living_spaces:
+            if living_space.name == living_space_name:
+                return living_space
         return not found
-
-
-
-
-
-
-
-
