@@ -1,16 +1,20 @@
 import random
 from models import Model
+import room
+import person
 
 MAX_OFFICE_CAP = 6
 MAX_LIVING_SPACE_CAP = 4
 
 
-class Room:
-    """This class contains the methods and attributes common to the Office and LivingSpace classes"""
+class Dojo:
+    """This class contains methods for adding persons, creating new rooms, and for returning
+       all rooms or all persons in storage
+    """
 
     def __init__(self):
-        self.name = None
-        self.current_capacity = 0
+        """Instantiates the Model class to allow for storage"""
+        self.model = Model()
 
     @staticmethod
     def allocate_office_space(person_name, person_type):
@@ -27,22 +31,22 @@ class Room:
         # return a list of offices with capacity to spare
         non_full_offices = [office
                             for office in all_offices
-                            if office["current_capacity"] < MAX_OFFICE_CAP]
+                            if office.current_capacity < MAX_OFFICE_CAP]
         if not non_full_offices:
             raise ValueError("There are no offices to allocate")
 
         if person_type == "fellow":
             random_office = random.choice(non_full_offices)
             fellow = Model.get_fellow(person_name)
-            random_office["current_capacity"] += 1
-            fellow["current_office"] = random_office["name"]
+            random_office.current_capacity += 1
+            fellow.current_office = random_office.name
             return successful
 
         elif person_type == "staff":
             random_office = random.choice(non_full_offices)
             staff = Model.get_staff(person_name)
-            random_office["current_capacity"] += 1
-            staff["current_office"] = random_office["name"]
+            random_office.current_capacity += 1
+            staff.current_office = random_office.name
             return successful
 
         else:
@@ -63,73 +67,96 @@ class Room:
         # return a list of living spaces with capacity to spare
         non_full_living_spaces = [living_space
                                   for living_space in all_living_spaces
-                                  if living_space["current_capacity"] < MAX_LIVING_SPACE_CAP]
+                                  if living_space.current_capacity < MAX_LIVING_SPACE_CAP]
 
         if not non_full_living_spaces:
             raise ValueError("There are no living spaces to allocate")
         random_living_space = random.choice(non_full_living_spaces)
         fellow = Model.get_fellow(fellow_name)
-        random_living_space["current_capacity"] += 1
-        fellow["current_living_space"] = random_living_space["name"]
+        random_living_space.current_capacity += 1
+        fellow.current_living_space = random_living_space.name
 
         return successful
 
-
-class Office(Room):
-    """Subclass of Room. Contains methods for creating a new office and returning all offices created"""
-
-    def __init__(self):
-        Room.__init__(self)
-        self.model = Model()
-
-    def create_new(self, new_office):
+    def create_new_office(self, name):
         """ Creates a new office """
 
         successful = True
-        self.name = new_office
-        new_entry = {"name": self.name, "current_capacity": self.current_capacity}
+        new_office = room.Office(name)
 
         # get the existing offices
         offices = Model.get_list("offices")
         # check whether the office already exists, if it does raise an exception
-        for entry in offices:
-            if entry["name"] == self.name:
-                raise ValueError("Office {} already exists".format(self.name))
-        self.model.update(new_entry, "offices")
+        for office in offices:
+            if office.name == name:
+                raise ValueError("Office {} already exists".format(name))
+        self.model.update(new_office, "offices")
         return successful
+
+    def create_new_living_space(self, name):
+        """ Creates a new living space """
+
+        successful = True
+        new_living_space = room.LivingSpace(name)
+        living_spaces = Model.get_list("living_spaces")
+
+        # check whether the living space already exists, if it does raise an exception
+        for living_space in living_spaces:
+            if living_space.name == name:
+                raise ValueError("Living space {} already exists".format(name))
+        # create new living space
+        self.model.update(new_living_space, "living_spaces")
+        return successful
+
+    def add_fellow(self, name, wants_accommodation=False):
+        """ Adds a new fellow """
+
+        new_fellow = person.Fellow(name)
+        self.model.update(new_fellow, "fellows")
+        print("Fellow {} has been successfully added".format(new_fellow.name))
+        try:
+            self.allocate_office_space(new_fellow.name, person_type="fellow")
+            print("{} has been allocated the office {}"
+                  .format(new_fellow.name, new_fellow.current_office))
+        except ValueError as e:
+                print(e)
+
+        if wants_accommodation:
+            try:
+                self.allocate_living_space(new_fellow.name)
+                print("{} has been allocated the living space {}"
+                      .format(new_fellow.name, new_fellow.current_living_space))
+            except ValueError as e:
+                print(e)
+
+    def add_staff(self, name):
+        """ Adds a new member of staff """
+
+        new_staff = person.Staff(name)
+        self.model.update(new_staff, "staff")
+        print("Staff {} has been successfully added".format(new_staff.name))
+        try:
+            self.allocate_office_space(new_staff.name, person_type="staff")
+            print("{} has been allocated the office {}"
+                  .format(new_staff.name, new_staff.current_office))
+        except ValueError as e:
+            print(e)
+
+    @property
+    def all_fellows(self):
+        """ Returns a list containing all the fellows added """
+        return Model.get_list("fellows")
+
+    @property
+    def all_staff(self):
+        """ Returns a list containing all added members of staff"""
+        return Model.get_list("staff")
 
     @property
     def all_offices(self):
         """ Return a list containing all the offices created """
 
         return Model.get_list("offices")
-
-
-class LivingSpace(Room):
-    """Subclass of the Room class. Contains methods for creating a new living space and
-       returning all living spaces
-    """
-
-    def __init__(self):
-        Room.__init__(self)
-        self.model = Model()
-
-    def create_new(self, new_living_space):
-        """ Creates a new living space """
-
-        successful = True
-        self.name = new_living_space
-        new_entry = {"name": self.name, "current_capacity": self.current_capacity}
-
-        # get the existing living_spaces
-        living_spaces = Model.get_list("living_spaces")
-        # check whether the living space already exists, if it does raise an exception
-        for entry in living_spaces:
-            if entry["name"] == self.name:
-                raise ValueError("Living space {} already exists".format(self.name))
-        # create new living space
-        self.model.update(new_entry, "living_spaces")
-        return successful
 
     @property
     def all_living_spaces(self):
