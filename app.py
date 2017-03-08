@@ -13,7 +13,7 @@
 import docopt
 import cmd
 import person
-import dojo
+from dojo import Dojo
 
 
 def docopt_cmd(func):
@@ -43,12 +43,12 @@ class Arguments(cmd.Cmd):
         try:
             if arg["<room_type>"] == "office":
                 for room_name in arg["<room_name>"]:
-                    new_office = dojo.Office().create_new(room_name)
+                    new_office = Dojo().create_new_office(room_name)
                     if new_office:
                         print("An office called {} has been successfully created".format(room_name))
             elif arg["<room_type>"] == "living_space":
                 for room_name in arg["<room_name>"]:
-                    new_living_space = dojo.LivingSpace().create_new(room_name)
+                    new_living_space = Dojo().create_new_living_space(room_name)
                     if new_living_space:
                         print("A living space called {} has been successfully created".format(room_name))
         except ValueError as e:
@@ -62,21 +62,20 @@ class Arguments(cmd.Cmd):
                -y    wants accommodation
         """
 
-        new_fellow = person.Fellow()
-        new_staff = person.Staff()
+        the_dojo = Dojo()
         person_name = " ".join(arg["<person_name>"])
 
         if arg["fellow"] and arg["-y"]:
-            new_fellow.add(person_name, wants_accommodation=True)
+            the_dojo.add_fellow(person_name, wants_accommodation=True)
 
         elif arg["fellow"]:
-            new_fellow.add(person_name)
+            the_dojo.add_fellow(person_name)
 
         elif arg["staff"] and arg["-y"]:
             print("Staff cannot be allocated a living space")
 
         elif arg["staff"]:
-            new_staff.add(person_name)
+            the_dojo.add_staff(person_name)
 
     @docopt_cmd
     def do_quit(self, arg):
