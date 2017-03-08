@@ -1,6 +1,6 @@
 import unittest
 from person import Fellow, Staff
-from dojo import Office, LivingSpace
+from dojo import Dojo
 from models import Model
 
 
@@ -11,67 +11,52 @@ class RoomTests(unittest.TestCase):
     """
 
     def setUp(self):
-        self.new_office = Office()
-        self.new_living_space = LivingSpace()
-        self.new_fellow = Fellow()
-        self.new_staff = Staff()
+        self.dojo = Dojo()
+        self.model = Model()
 
     def test_create_new_office(self):
-        initial_office_count = len(self.new_office.all_offices)
-        self.new_office.create_new("Test")
-        new_office_count = len(self.new_office.all_offices)
+        initial_office_count = len(self.dojo.all_offices)
+        self.dojo.create_new_office("Test")
+        new_office_count = len(self.dojo.all_offices)
         self.assertEqual(new_office_count - initial_office_count, 1,
                          "A new office was not created")
 
     def test_create_new_living_space(self):
-        initial_living_space_count = len(self.new_living_space.all_living_spaces)
-        self.new_living_space.create_new("Test")
-        new_living_space_count = len(self.new_living_space.all_living_spaces)
+        initial_living_space_count = len(self.dojo.all_living_spaces)
+        self.dojo.create_new_living_space("Test")
+        new_living_space_count = len(self.dojo.all_living_spaces)
         self.assertEqual(new_living_space_count - initial_living_space_count, 1,
                          "A new living space was not created")
 
     def test_does_not_allow_duplicate_offices(self):
         with self.assertRaises(ValueError):
-            self.new_office.create_new("Test")
+            self.dojo.create_new_office("Test")
+            self.dojo.create_new_office("Test")
 
     def test_does_not_allow_duplicate_living_spaces(self):
         with self.assertRaises(ValueError):
-            self.new_living_space.create_new("Test")
+            self.dojo.create_new_living_space("Test")
+            self.dojo.create_new_living_space("Test")
 
     def test_allocate_office(self):
-        # add a new fellow and a new staff member
-        self.new_fellow.add("Test Fellow")
-        self.new_staff.add("Test Staff")
-        # create a new office
-        self.new_office.create_new("Red")
-        # allocate them an office space
-        self.new_office.allocate_office_space("Test Fellow", "fellow")
-        self.new_office.allocate_office_space("Test Staff", "staff")
-        # get the office they have been allocated
-        fellow_office = self.new_fellow.get_current_office("Test Fellow", "fellow")
-        staff_office = self.new_staff.get_current_office("Test Staff", "staff")
-        # check if it is the correct living space
-        self.assertEqual((fellow_office, staff_office), ("Red", "Red"),
+        self.dojo.create_new_office("Red")
+        self.dojo.add_fellow("Test Fellow")
+        self.dojo.add_staff("Test Staff")
+        fellow = self.model.get_fellow("Test Fellow")
+        staff = self.model.get_staff("Test Staff")
+        self.assertEqual((fellow.current_office, staff.current_office), ("Red", "Red"),
                          "Office allocation not successful")
-        # check if the office capacity is correct
         office_to_check = Model.get_office("Red")
-        self.assertEqual(office_to_check["current_capacity"], 2,
+        self.assertEqual(office_to_check.current_capacity, 2,
                          "Office allocation not successful")
 
     def test_allocate_living_space(self):
-        # add a new fellow
-        self.new_fellow.add("Test Fellow 2")
-        # create a new living space
-        self.new_living_space.create_new("Blue")
-        # allocate the fellow a living space
-        self.new_living_space.allocate_living_space("Test Fellow 2")
-        # get the living space the fellow has been allocated
-        living_space_alloc = self.new_fellow.get_current_living_space("Test Fellow 2")
-        # check whether it is the correct living space
-        self.assertEqual(living_space_alloc, "Blue")
-        # check whether the capacity is correct
+        self.dojo.create_new_living_space("Blue")
+        self.dojo.add_fellow("Test Fellow 2", wants_accommodation=True)
+        fellow = self.model.get_fellow("Test Fellow 2")
+        self.assertEqual(fellow.current_living_space, "Blue")
         living_space_to_check = Model.get_living_space("Blue")
-        self.assertEqual(living_space_to_check["current_capacity"], 1)
+        self.assertEqual(living_space_to_check.current_capacity, 1)
 
 
 class PersonTests(unittest.TestCase):
@@ -81,20 +66,20 @@ class PersonTests(unittest.TestCase):
      """
 
     def setUp(self):
-        self.new_fellow = Fellow()
-        self.new_staff = Staff()
+        self.dojo = Dojo()
 
     def test_add_new_fellow(self):
-        initial_fellow_count = len(self.new_fellow.all_fellows)
-        self.new_fellow.add("Harry Potter")
-        new_fellow_count = len(self.new_fellow.all_fellows)
-        self.assertEqual(new_fellow_count - initial_fellow_count, 1,
-                         "A new fellow was not added")
+        initial_fellow_count = len(self.dojo.all_fellows)
+        self.dojo.add_fellow("Harry Potter")
+        new_fellow_count = len(self.dojo.all_fellows)
+        self.assertEqual(new_fellow_count - initial_fellow_count, 1, "A new fellow was not added")
 
     def test_add_new_staff(self):
-        initial_staff_count = len(self.new_staff.all_staff)
-        self.new_staff.add("Severus Snape")
-        new_staff_count = len(self.new_staff.all_staff)
-        self.assertEqual(new_staff_count - initial_staff_count, 1,
-                         "A new staff member was not added")
+        initial_staff_count = len(self.dojo.all_staff)
+        self.dojo.add_staff("Severus Snape")
+        new_staff_count = len(self.dojo.all_staff)
+        self.assertEqual(new_staff_count - initial_staff_count, 1, "A new staff member was not added")
+
+    def test_print_room_occupants(self):
+        pass
 
