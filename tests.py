@@ -16,14 +16,14 @@ class RoomTests(unittest.TestCase):
 
     def test_create_new_office(self):
         initial_office_count = len(self.dojo.all_offices)
-        self.dojo.create_new_office("Test")
+        self.dojo.create_new_office("Test_Office")
         new_office_count = len(self.dojo.all_offices)
         self.assertEqual(new_office_count - initial_office_count, 1,
                          "A new office was not created")
 
     def test_create_new_living_space(self):
         initial_living_space_count = len(self.dojo.all_living_spaces)
-        self.dojo.create_new_living_space("Test")
+        self.dojo.create_new_living_space("Test_Living_Space")
         new_living_space_count = len(self.dojo.all_living_spaces)
         self.assertEqual(new_living_space_count - initial_living_space_count, 1,
                          "A new living space was not created")
@@ -82,4 +82,42 @@ class PersonTests(unittest.TestCase):
 
     def test_print_room_occupants(self):
         pass
+
+
+class PrintTests(unittest.TestCase):
+    def setUp(self):
+        self.dojo = Dojo()
+
+    def test_get_occupants_of_given_room(self):
+        self.dojo.create_new_living_space("Chui")
+        self.dojo.create_new_office("Simba")
+        persons = ["Harry Potter", "Hermione Granger", "Ron Weasley", "Draco Malfoy"]
+        for person in persons:
+            self.dojo.add_fellow(person, wants_accommodation=True)
+        persons_in_living_space = self.dojo.get_persons_by_room(room_name="Chui")
+        persons_in_office = self.dojo.get_persons_by_room(room_name="Simba")
+        msg = "Could not get the occupants of the given room"
+        self.assertEqual(persons_in_living_space, persons, msg)
+        self.assertEqual(persons_in_office, persons, msg)
+
+    def test_get_all_room_allocations(self):
+        self.dojo.create_new_living_space("Living Space 1")
+        self.dojo.create_new_office("Office 1")
+        persons = ["Mary", "John", "Tom", "Harry"]
+        expected_allocations = {"Living Space 1": persons, "Office 1": persons}
+        for person in persons:
+            self.dojo.add_fellow(person, wants_accommodation=True)
+        actual_allocations = self.dojo.get_allocations()
+        self.assertEqual(expected_allocations, actual_allocations, "The wrong allocations were returned")
+
+    def test_print_unallocated_persons(self):
+        persons = ["Alpha", "Beta", "Gamma", "Delta"]
+        for person in persons:
+            self.dojo.add_fellow(person, wants_accommodation=True)
+        unallocated_persons = self.dojo.get_unallocated()
+        msg = "Could not get the unallocated people"
+        self.assertEqual(unallocated_persons, persons)
+
+
+
 
