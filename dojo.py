@@ -86,10 +86,12 @@ class Dojo:
 
         # get the existing offices
         offices = Model.get_list("offices")
+        living_spaces = Model.get_list("living_spaces")
         # check whether the office already exists, if it does raise an exception
-        for office in offices:
-            if office.name == name:
-                raise ValueError("Office {} already exists".format(name))
+        similar_office = [office for office in offices if office.name == name]
+        similar_living_space = [ls for ls in living_spaces if ls.name == name]
+        if similar_office or similar_living_space:
+            raise ValueError("An office or living space '{}' already exists".format(name))
         self.model.update(new_office, "offices")
         return successful
 
@@ -99,11 +101,12 @@ class Dojo:
         successful = True
         new_living_space = room.LivingSpace(name)
         living_spaces = Model.get_list("living_spaces")
-
+        offices = Model.get_list("offices")
         # check whether the living space already exists, if it does raise an exception
-        for living_space in living_spaces:
-            if living_space.name == name:
-                raise ValueError("Living space {} already exists".format(name))
+        similar_living_space = [ls for ls in living_spaces if ls.name == name]
+        similar_office = [office for office in offices if office.name == name]
+        if similar_living_space or similar_office:
+            raise ValueError("An office or living space '{}' already exists".format(name))
         # create new living space
         self.model.update(new_living_space, "living_spaces")
         return successful
@@ -141,6 +144,19 @@ class Dojo:
                   .format(new_staff.name, new_staff.current_office))
         except ValueError as e:
             print(e)
+
+    def get_persons_by_room(self, room_name):
+        """Return a list of persons in the given room_name"""
+        pass
+
+    def get_allocations(self):
+        """Return a dictionary with all the allocations as shown
+           {room_name: [all persons in the room]}
+        """
+        pass
+
+    def get_unallocated(self):
+        pass
 
     @property
     def all_fellows(self):
