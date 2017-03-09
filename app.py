@@ -45,12 +45,12 @@ class Arguments(cmd.Cmd):
                 for room_name in arg["<room_name>"]:
                     new_office = Dojo().create_new_office(room_name)
                     if new_office:
-                        print("An office called {} has been successfully created".format(room_name))
+                        print("An office called '{}' has been successfully created".format(room_name))
             elif arg["<room_type>"] == "living_space":
                 for room_name in arg["<room_name>"]:
                     new_living_space = Dojo().create_new_living_space(room_name)
                     if new_living_space:
-                        print("A living space called {} has been successfully created".format(room_name))
+                        print("A living space called '{}' has been successfully created".format(room_name))
         except ValueError as e:
             print(e)
 
