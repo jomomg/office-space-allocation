@@ -147,6 +147,7 @@ class Dojo:
             print(e)
 
     def get_persons_by_room(self, room):
+        """Returns a list of the people in the given room"""
         rooms = self.model.get_list("offices") + self.model.get_list("living_spaces")
         if room not in [room.name for room in rooms]:
             raise ValueError("The requested room does not exist")
@@ -160,7 +161,7 @@ class Dojo:
         return persons_in_room
 
     def print_persons_by_room(self, room_name):
-        """Return a list of persons in the given room_name"""
+        """Prints the people in the given room to screen"""
         try:
             persons_in_given_room = self.get_persons_by_room(room_name)
             is_office = self.model.get_office(room_name)
@@ -173,6 +174,7 @@ class Dojo:
             print(e)
 
     def print_allocations(self, filename=None):
+        """Prints all the room allocations to the screen or to a txt file"""
         staff = self.model.get_list("staff")
         fellows = self.model.get_list("fellows")
 
@@ -215,6 +217,8 @@ class Dojo:
             return output
 
     def get_unallocated_persons(self):
+        """Returns a dictionary with the unallocated persons"""
+
         staff = self.model.get_list("staff")
         fellows = self.model.get_list("fellows")
         # staff without an office
@@ -235,6 +239,7 @@ class Dojo:
                 "fellows_living": unallocated_fellows_living_space}
 
     def print_unallocated(self, filename=None):
+        """Prints all the unallocated persons to screen or to a txt file"""
         unallocated = self.get_unallocated_persons()
 
         output = "STAFF WITHOUT AN OFFICE:\n" \
