@@ -6,9 +6,9 @@
 # How to run the app
   * Clone the repository.
   * Install the app's dependencies by running `pip install -r requirements` inside the repo folder
-  * Open a terminal console and run `python app.py`
+  * Open a terminal console and run `python run.py`
   
 # How to run the tests
-  * Open a terminal console and run `nosetests tests.py`
+  * Open a terminal console and run `nosetests`
   
   
