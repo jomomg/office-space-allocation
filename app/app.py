@@ -2,7 +2,7 @@
 
    Usage:
        app.py create_room <room_type> <room_name>
-       app.py add_person (fellow|staff) <person_name> [-y]
+       app.py add_person (fellow|staff) <email_address> <person_name>  [-y]
        app.py print_room <room_name>
        app.py print_allocations [-o=filename]
        app.py print_unallocated [-o=filename]
@@ -63,7 +63,7 @@ class Arguments(cmd.Cmd):
 
     @docopt_cmd
     def do_add_person(self, arg):
-        """Usage: add_person (fellow|staff) <person_name>... [-y]
+        """Usage: add_person (fellow|staff) <email_address> <person_name>... [-y]
 
            Options:
                -y    wants accommodation
@@ -72,18 +72,19 @@ class Arguments(cmd.Cmd):
         print("")
         the_dojo = Dojo()
         person_name = " ".join(arg["<person_name>"])
+        email = arg["<email_address>"]
 
         if arg["fellow"] and arg["-y"]:
-            the_dojo.add_fellow(person_name, wants_accommodation=True)
+            the_dojo.add_fellow(person_name, email, wants_accommodation=True)
 
         elif arg["fellow"]:
-            the_dojo.add_fellow(person_name)
+            the_dojo.add_fellow(person_name, email)
 
         elif arg["staff"] and arg["-y"]:
             print("Staff cannot be allocated a living space")
 
         elif arg["staff"]:
-            the_dojo.add_staff(person_name)
+            the_dojo.add_staff(person_name, email)
         print("")
 
     @docopt_cmd
