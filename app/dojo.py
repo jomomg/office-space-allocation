@@ -1,8 +1,10 @@
 import itertools
 import random
+import re
 
 from app import person, room
 from app.models import Model
+
 
 MAX_OFFICE_CAP = 6
 MAX_LIVING_SPACE_CAP = 4
@@ -112,10 +114,10 @@ class Dojo:
         self.model.update(new_living_space, "living_spaces")
         return successful
 
-    def add_fellow(self, name, wants_accommodation=False):
+    def add_fellow(self, name, email, wants_accommodation=False):
         """ Adds a new fellow """
 
-        new_fellow = person.Fellow(name)
+        new_fellow = person.Fellow(name, email)
         self.model.update(new_fellow, "fellows")
         print("Fellow {} has been successfully added".format(new_fellow.name))
         try:
@@ -133,10 +135,10 @@ class Dojo:
             except ValueError as e:
                 print(e)
 
-    def add_staff(self, name):
+    def add_staff(self, name, email):
         """ Adds a new member of staff """
 
-        new_staff = person.Staff(name)
+        new_staff = person.Staff(name, email)
         self.model.update(new_staff, "staff")
         print("Staff {} has been successfully added".format(new_staff.name))
         try:
@@ -258,6 +260,12 @@ class Dojo:
         else:
             return output
 
+    def reallocate_person(self, name, new_room):
+        pass
+
+    def load_people_from_txt_file(self, filename):
+        pass
+
     @property
     def all_fellows(self):
         """ Returns a list containing all the fellows added """
@@ -278,3 +286,4 @@ class Dojo:
     def all_living_spaces(self):
         """ Return a list containing all the living spaces created """
         return Model.get_list("living_spaces")
+
