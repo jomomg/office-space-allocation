@@ -30,13 +30,13 @@ class RoomTests(unittest.TestCase):
                          "A new living space was not created")
 
     def test_does_not_allow_duplicate_offices(self):
+        self.dojo.create_new_office("Test")
         with self.assertRaises(ValueError):
-            self.dojo.create_new_office("Test")
             self.dojo.create_new_office("Test")
 
     def test_does_not_allow_duplicate_living_spaces(self):
+        self.dojo.create_new_living_space("Test")
         with self.assertRaises(ValueError):
-            self.dojo.create_new_living_space("Test")
             self.dojo.create_new_living_space("Test")
 
     def test_allocate_office(self):
