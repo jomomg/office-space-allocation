@@ -1,4 +1,5 @@
 import unittest
+import os
 
 from app.dojo import Dojo
 from app.models import Model
@@ -57,3 +58,69 @@ class RoomTests(unittest.TestCase):
         self.assertEqual(fellow.current_living_space, "Blue")
         living_space_to_check = Model.get_living_space("Blue")
         self.assertEqual(living_space_to_check.current_capacity, 1)
+
+    # Reallocation tests
+
+    def test_reallocation(self):
+        self.model.flush()
+        old_office_name = "Blue"
+        new_office_name = "Red"
+        self.dojo.create_new_office(old_office_name)
+        self.dojo.add_fellow("John")
+        self.dojo.create_new_office(new_office_name)
+        self.dojo.reallocate_person("John", "Red")
+        new_fellow = self.model.get_fellow("John")
+        msg = "person was not successfully reallocated"
+        self.assertEqual(new_office_name, new_fellow.current_office, msg)
+
+    def test_raises_exception_if_person_not_found(self):
+        self.model.flush()
+        self.dojo.create_new_office("Green")
+        with self.assertRaises(ValueError):
+            self.dojo.reallocate_person("Phillip", "Green")
+
+    def test_raises_exception_if_destination_room_is_full(self):
+        self.model.flush()
+        self.dojo.create_new_office("Yellow")
+        new_fellows = ["Mary", "Monica", "Lisa", "Lucy", "Jane"]
+        for fellow in new_fellows:
+            self.dojo.add_fellow(fellow)
+        with self.assertRaises(OverflowError):
+            self.dojo.reallocate_person("Julia", "Yellow")
+
+    def test_cannot_reallocate_staff_to_living_space(self):
+        self.model.flush()
+        self.dojo.create_new_office("Orange")
+        self.dojo.create_new_living_space("Delta")
+        self.dojo.add_staff("James")
+        with self.assertRaises(ValueError):
+             self.dojo.reallocate_person("James", "Delta")
+
+    def test_raises_exception_if_destination_room_is_non_existent(self):
+        self.model.flush()
+        self.dojo.create_new_office("Violet")
+        self.dojo.add_fellow("David")
+        with self.assertRaises(ValueError):
+            self.dojo.reallocate_person("David", "Cyan")
+
+    def test_loads_people_from_txt_file(self):
+        self.model.flush()
+        self.dojo.create_new_office("Iota")
+        self.dojo.create_new_living_space("Zeta")
+        with open("people.txt", "w") as test_file:
+            output = "BRUCE WAYNE FELLOW Y\n" \
+                     "BARRY ALLEN STAFF\n"
+            test_file.write(output)
+
+        self.dojo.load_people_from_txt_file("people")
+        new_fellow = self.model.get_fellow("Bruce Wayne")
+        new_staff = self.model.get_staff("Barry Allen")
+        self.assertTrue(new_fellow)
+        self.assertTrue(new_staff)
+        self.assertEqual("Iota", new_staff.current_office)
+        self.assertEqual("Zeta", new_fellow.current_living_space)
+        os.remove("people.txt")
+
+    def test_raises_exception_if_txt_file_not_found(self):
+        with self.assertRaises(FileNotFoundError):
+            self.dojo.load_people_from_txt_file("test_file.txt")
