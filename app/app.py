@@ -2,10 +2,12 @@
 
    Usage:
        app.py create_room <room_type> <room_name>
-       app.py add_person (fellow|staff) <person_name> [-y]
+       app.py add_person (fellow|staff) <email_address> <person_name>  [-y]
        app.py print_room <room_name>
        app.py print_allocations [-o=filename]
        app.py print_unallocated [-o=filename]
+       app.py reallocate <email_address> <person_name> <new_room>
+       app.py load_people <filename>
        app.py quit
 
    Options:
@@ -63,7 +65,7 @@ class Arguments(cmd.Cmd):
 
     @docopt_cmd
     def do_add_person(self, arg):
-        """Usage: add_person (fellow|staff) <person_name>... [-y]
+        """Usage: add_person (fellow|staff) <email_address> <person_name>... [-y]
 
            Options:
                -y    wants accommodation
@@ -72,18 +74,19 @@ class Arguments(cmd.Cmd):
         print("")
         the_dojo = Dojo()
         person_name = " ".join(arg["<person_name>"])
+        email = arg["<email_address>"]
 
         if arg["fellow"] and arg["-y"]:
-            the_dojo.add_fellow(person_name, wants_accommodation=True)
+            the_dojo.add_fellow(person_name, email, wants_accommodation=True)
 
         elif arg["fellow"]:
-            the_dojo.add_fellow(person_name)
+            the_dojo.add_fellow(person_name, email)
 
         elif arg["staff"] and arg["-y"]:
             print("Staff cannot be allocated a living space")
 
         elif arg["staff"]:
-            the_dojo.add_staff(person_name)
+            the_dojo.add_staff(person_name, email)
         print("")
 
     @docopt_cmd
@@ -126,6 +129,37 @@ class Arguments(cmd.Cmd):
         filename = arg["-o"]
         if filename:
             the_dojo.print_unallocated(filename)
+
+    @docopt_cmd
+    def do_reallocate(self, arg):
+        """Usage: reallocate <email_address> <person_name> <new_room>"""
+
+        the_dojo = Dojo()
+        print("")
+        person_name = arg["<person_name>"]
+        email = arg["<email_address>"]
+        new_room = arg["<new_room>"]
+        print("")
+        try:
+            the_dojo.reallocate_person(person_name, email, new_room)
+        except ValueError as e:
+            print(e)
+        except OverflowError as e:
+            print(e)
+        print("")
+
+    @docopt_cmd
+    def do_load_people(self, arg):
+        """Usage: load_people <filename>"""
+
+        the_dojo = Dojo()
+        filename = arg["<filename>"]
+        print("")
+        try:
+            the_dojo.load_people_from_txt_file(filename)
+        except FileNotFoundError:
+            print("The filename given was not found")
+        print("")
 
     @docopt_cmd
     def do_quit(self, arg):

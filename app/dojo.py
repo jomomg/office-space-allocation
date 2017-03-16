@@ -4,6 +4,7 @@ import random
 from app import person, room
 from app.models import Model
 
+
 MAX_OFFICE_CAP = 6
 MAX_LIVING_SPACE_CAP = 4
 
@@ -18,7 +19,7 @@ class Dojo:
         self.model = Model()
 
     @staticmethod
-    def allocate_office_space(person_name, person_type):
+    def allocate_office_space(person_name, email, person_type):
         """ This methods randomly allocates an office to a fellow or staff.
 
             Returns True if successful and False if not
@@ -38,14 +39,14 @@ class Dojo:
 
         if person_type == "fellow":
             random_office = random.choice(non_full_offices)
-            fellow = Model.get_fellow(person_name)
+            fellow = Model.get_fellow(person_name, email)
             random_office.current_capacity += 1
             fellow.current_office = random_office.name
             return successful
 
         elif person_type == "staff":
             random_office = random.choice(non_full_offices)
-            staff = Model.get_staff(person_name)
+            staff = Model.get_staff(person_name, email)
             random_office.current_capacity += 1
             staff.current_office = random_office.name
             return successful
@@ -54,7 +55,7 @@ class Dojo:
             return not successful
 
     @staticmethod
-    def allocate_living_space(fellow_name):
+    def allocate_living_space(fellow_name, email):
         """ This methods randomly allocates a living space to a fellow or staff.
 
             Returns True if successful and False if not
@@ -73,7 +74,7 @@ class Dojo:
         if not non_full_living_spaces:
             raise ValueError("There are no living spaces to allocate")
         random_living_space = random.choice(non_full_living_spaces)
-        fellow = Model.get_fellow(fellow_name)
+        fellow = Model.get_fellow(fellow_name, email)
         random_living_space.current_capacity += 1
         fellow.current_living_space = random_living_space.name
 
@@ -112,14 +113,14 @@ class Dojo:
         self.model.update(new_living_space, "living_spaces")
         return successful
 
-    def add_fellow(self, name, wants_accommodation=False):
+    def add_fellow(self, name, email, wants_accommodation=False):
         """ Adds a new fellow """
 
-        new_fellow = person.Fellow(name)
+        new_fellow = person.Fellow(name, email)
         self.model.update(new_fellow, "fellows")
         print("Fellow {} has been successfully added".format(new_fellow.name))
         try:
-            self.allocate_office_space(new_fellow.name, person_type="fellow")
+            self.allocate_office_space(new_fellow.name, email, person_type="fellow")
             print("{} has been allocated the office {}"
                   .format(new_fellow.name, new_fellow.current_office))
         except ValueError as e:
@@ -127,20 +128,20 @@ class Dojo:
 
         if wants_accommodation:
             try:
-                self.allocate_living_space(new_fellow.name)
+                self.allocate_living_space(new_fellow.name, email)
                 print("{} has been allocated the living space {}"
                       .format(new_fellow.name, new_fellow.current_living_space))
             except ValueError as e:
                 print(e)
 
-    def add_staff(self, name):
+    def add_staff(self, name, email):
         """ Adds a new member of staff """
 
-        new_staff = person.Staff(name)
+        new_staff = person.Staff(name, email)
         self.model.update(new_staff, "staff")
         print("Staff {} has been successfully added".format(new_staff.name))
         try:
-            self.allocate_office_space(new_staff.name, person_type="staff")
+            self.allocate_office_space(new_staff.name, email, person_type="staff")
             print("{} has been allocated the office {}"
                   .format(new_staff.name, new_staff.current_office))
         except ValueError as e:
@@ -148,6 +149,7 @@ class Dojo:
 
     def get_persons_by_room(self, room):
         """Returns a list of the people in the given room"""
+
         rooms = self.model.get_list("offices") + self.model.get_list("living_spaces")
         if room not in [room.name for room in rooms]:
             raise ValueError("The requested room does not exist")
@@ -162,6 +164,7 @@ class Dojo:
 
     def print_persons_by_room(self, room_name):
         """Prints the people in the given room to screen"""
+
         try:
             persons_in_given_room = self.get_persons_by_room(room_name)
             is_office = self.model.get_office(room_name)
@@ -175,6 +178,7 @@ class Dojo:
 
     def print_allocations(self, filename=None):
         """Prints all the room allocations to the screen or to a txt file"""
+
         staff = self.model.get_list("staff")
         fellows = self.model.get_list("fellows")
 
@@ -240,6 +244,7 @@ class Dojo:
 
     def print_unallocated(self, filename=None):
         """Prints all the unallocated persons to screen or to a txt file"""
+
         unallocated = self.get_unallocated_persons()
 
         output = "STAFF WITHOUT AN OFFICE:\n" \
@@ -258,6 +263,71 @@ class Dojo:
         else:
             return output
 
+    def reallocate_person(self, name, email, new_room):
+        """Reallocates the specified person to a new room"""
+
+        person_to_reallocate = self.model.get_fellow(name, email) or self.model.get_staff(name, email)
+        if not person_to_reallocate:
+            raise ValueError("The person specified was not found")
+        destination_room = self.model.get_office(new_room) or self.model.get_living_space(new_room)
+        if not destination_room:
+            raise ValueError("The destination room was not found")
+
+        if isinstance(destination_room, room.Office):
+            if destination_room.current_capacity >= MAX_OFFICE_CAP:
+                raise OverflowError("The destination room, office {}, is full".format(destination_room))
+            else:
+                person_to_reallocate.current_office = destination_room.name
+
+        elif isinstance(destination_room, room.LivingSpace):
+            if destination_room.current_capacity >= MAX_LIVING_SPACE_CAP:
+                raise OverflowError("The destination room, living space {}, is full".format(destination_room))
+            else:
+                if isinstance(person_to_reallocate, person.Staff):
+                    raise ValueError("Cannot reallocate staff to a living space")
+                else:
+                    person_to_reallocate.current_living_space = destination_room.name
+
+        print("{} {} has been reallocated to the {} {}".format(type(person_to_reallocate),
+                                                               person_to_reallocate.name,
+                                                               type(destination_room),
+                                                               destination_room.name))
+
+    def load_people_from_txt_file(self, filename):
+        """Adds staff and fellows by taking the input to a txt file"""
+
+        persons = []
+        with open(filename+".txt", "r") as input_file:
+            for line in input_file:
+                args = line.split()
+                person_email = args[0]
+                wants_accommodation = False
+                person_type = None
+
+                if "Y" in args:
+                    wants_accommodation = True
+                    args.remove("Y")
+                if "FELLOW" in args:
+                    person_type = "fellow"
+                    args.remove("FELLOW")
+                elif "STAFF" in args:
+                    person_type = "staff"
+                    args.remove("STAFF")
+                person_name = " ".join(args[1:])
+
+                persons.append({"email": person_email,
+                                "name": person_name.title(),
+                                "type": person_type,
+                                "wants_accommodation": wants_accommodation})
+
+        fellows = [person for person in persons if person["type"] == "fellow"]
+        staff = [person for person in persons if person["type"] == "staff"]
+
+        for fellow in fellows:
+            self.add_fellow(fellow["name"], fellow["email"], fellow["wants_accommodation"])
+        for staff_member in staff:
+            self.add_staff(staff_member["name"], staff_member["email"])
+
     @property
     def all_fellows(self):
         """ Returns a list containing all the fellows added """
@@ -271,10 +341,10 @@ class Dojo:
     @property
     def all_offices(self):
         """ Return a list containing all the offices created """
-
         return Model.get_list("offices")
 
     @property
     def all_living_spaces(self):
         """ Return a list containing all the living spaces created """
         return Model.get_list("living_spaces")
+

@@ -19,7 +19,7 @@ class PrintTests(unittest.TestCase):
         self.dojo.create_new_living_space("Chui")
         persons = "Harry,Hermione,Ron,Draco"
         for person in persons.split(","):
-            self.dojo.add_fellow(person, wants_accommodation=True)
+            self.dojo.add_fellow(person, person + "@dojo.com", wants_accommodation=True)
         persons_in_living_space = self.dojo.print_persons_by_room(room_name="Chui")
         expected_output = "(LIVING SPACE) CHUI:\n" \
                           "{}".format(persons)
@@ -31,7 +31,7 @@ class PrintTests(unittest.TestCase):
         self.dojo.create_new_office("Simba")
         persons = "Harry,Hermione,Ron,Draco"
         for person in persons.split(","):
-            self.dojo.add_fellow(person)
+            self.dojo.add_fellow(person, person + "@dojo.com")
         persons_in_office = self.dojo.print_persons_by_room(room_name="Simba")
         expected_output = "(OFFICE) SIMBA:\n" \
                           "{}".format(persons)
@@ -50,7 +50,7 @@ class PrintTests(unittest.TestCase):
                              "-----------------------------\n" + \
                              "{}\n".format(persons.upper())
         for person in persons.split(","):
-            self.dojo.add_fellow(person, wants_accommodation=True)
+            self.dojo.add_fellow(person, person + "@dojo.com", wants_accommodation=True)
         actual_allocations = self.dojo.print_allocations()
         msg = "The wrong allocations were returned"
         self.assertIn(l_space_allocations, actual_allocations, msg)
@@ -61,7 +61,7 @@ class PrintTests(unittest.TestCase):
         persons = ["James", "Jerry", "Julia", "Jane"]
         self.dojo.create_new_office("Green")
         for person in persons:
-            self.dojo.add_fellow(person)
+            self.dojo.add_fellow(person, person + "@dojo.com")
         self.dojo.print_allocations("room_allocations")
         # make sure the text file has been created
         self.assertTrue(os.path.isfile("room_allocations.txt"))
@@ -79,7 +79,7 @@ class PrintTests(unittest.TestCase):
         self.model.flush()
         persons = "Alpha,Beta,Gamma,Delta"
         for person in persons.split(","):
-            self.dojo.add_fellow(person, wants_accommodation=True)
+            self.dojo.add_fellow(person, person+"@dojo.com", wants_accommodation=True)
         unallocated_persons = self.dojo.print_unallocated()
         expected_output = "STAFF WITHOUT AN OFFICE:\n" \
                           "----------------------------\n" \
@@ -97,8 +97,8 @@ class PrintTests(unittest.TestCase):
         self.model.flush()
         fellows = ["Odin", "Thor"]
         for fellow in fellows:
-            self.dojo.add_fellow(fellow)
-        self.dojo.add_staff("Loki")
+            self.dojo.add_fellow(fellow, fellow + "@dojo.com")
+        self.dojo.add_staff("Loki", "loki@dojo.com")
         self.dojo.print_unallocated("unallocated_persons")
         self.assertTrue(os.path.isfile("unallocated_persons.txt"))
         expected_output = "STAFF WITHOUT AN OFFICE:\n" \

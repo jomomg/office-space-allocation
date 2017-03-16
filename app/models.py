@@ -52,20 +52,20 @@ class Model:
             return not found
 
     @staticmethod
-    def get_fellow(fellow_name):
+    def get_fellow(fellow_name, email):
         """ Return a dictionary containing the details of the specified fellow"""
         found = True
         for fellow in fellows:
-            if fellow.name == fellow_name:
+            if fellow.name == fellow_name and fellow.email_address == email:
                 return fellow
         return not found
 
     @staticmethod
-    def get_staff(staff_name):
+    def get_staff(staff_name, email):
         """ Return a dictionary item containing the details of the specified staff"""
         found = True
         for staff_member in staff:
-            if staff_member.name == staff_name:
+            if staff_member.name == staff_name and staff_member.email_address == email:
                 return staff_member
         return not found
 
