@@ -149,6 +149,7 @@ class Dojo:
 
     def get_persons_by_room(self, room):
         """Returns a list of the people in the given room"""
+
         rooms = self.model.get_list("offices") + self.model.get_list("living_spaces")
         if room not in [room.name for room in rooms]:
             raise ValueError("The requested room does not exist")
@@ -163,6 +164,7 @@ class Dojo:
 
     def print_persons_by_room(self, room_name):
         """Prints the people in the given room to screen"""
+
         try:
             persons_in_given_room = self.get_persons_by_room(room_name)
             is_office = self.model.get_office(room_name)
@@ -176,6 +178,7 @@ class Dojo:
 
     def print_allocations(self, filename=None):
         """Prints all the room allocations to the screen or to a txt file"""
+
         staff = self.model.get_list("staff")
         fellows = self.model.get_list("fellows")
 
@@ -241,6 +244,7 @@ class Dojo:
 
     def print_unallocated(self, filename=None):
         """Prints all the unallocated persons to screen or to a txt file"""
+
         unallocated = self.get_unallocated_persons()
 
         output = "STAFF WITHOUT AN OFFICE:\n" \
@@ -290,6 +294,8 @@ class Dojo:
                                                                destination_room.name))
 
     def load_people_from_txt_file(self, filename):
+        """Adds staff and fellows by taking the input to a txt file"""
+
         persons = []
         with open(filename+".txt", "r") as input_file:
             for line in input_file:
@@ -335,7 +341,6 @@ class Dojo:
     @property
     def all_offices(self):
         """ Return a list containing all the offices created """
-
         return Model.get_list("offices")
 
     @property
