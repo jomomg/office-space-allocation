@@ -16,6 +16,7 @@ class RoomTests(unittest.TestCase):
         self.model = Model()
 
     def test_create_new_office(self):
+        self.model.flush()
         initial_office_count = len(self.dojo.all_offices)
         self.dojo.create_new_office("Test_Office")
         new_office_count = len(self.dojo.all_offices)
@@ -23,6 +24,7 @@ class RoomTests(unittest.TestCase):
                          "A new office was not created")
 
     def test_create_new_living_space(self):
+        self.model.flush()
         initial_living_space_count = len(self.dojo.all_living_spaces)
         self.dojo.create_new_living_space("Test_Living_Space")
         new_living_space_count = len(self.dojo.all_living_spaces)
@@ -30,16 +32,19 @@ class RoomTests(unittest.TestCase):
                          "A new living space was not created")
 
     def test_does_not_allow_duplicate_offices(self):
+        self.model.flush()
         self.dojo.create_new_office("Test")
         with self.assertRaises(ValueError):
             self.dojo.create_new_office("Test")
 
     def test_does_not_allow_duplicate_living_spaces(self):
+        self.model.flush()
         self.dojo.create_new_living_space("Test")
         with self.assertRaises(ValueError):
             self.dojo.create_new_living_space("Test")
 
     def test_allocate_office(self):
+        self.model.flush()
         self.dojo.create_new_office("Red")
         self.dojo.add_fellow("Test Fellow", "fellow@fellow.com")
         self.dojo.add_staff("Test Staff", "staff@staff.com")
@@ -52,6 +57,7 @@ class RoomTests(unittest.TestCase):
                          "Office allocation not successful")
 
     def test_allocate_living_space(self):
+        self.model.flush()
         self.dojo.create_new_living_space("Blue")
         self.dojo.add_fellow("Test Fellow 2", "test@test.com",  wants_accommodation=True)
         fellow = self.model.get_fellow("Test Fellow 2", "test@test.com")
@@ -68,7 +74,7 @@ class RoomTests(unittest.TestCase):
         self.dojo.create_new_office(old_office_name)
         self.dojo.add_fellow("John", "john@john.com")
         self.dojo.create_new_office(new_office_name)
-        self.dojo.reallocate_person("John", "john@dojo.com", "Red")
+        self.dojo.reallocate_person("John", "john@john.com", "Red")
         new_fellow = self.model.get_fellow("John", "john@john.com")
         msg = "person was not successfully reallocated"
         self.assertEqual(new_office_name, new_fellow.current_office, msg)
@@ -81,6 +87,7 @@ class RoomTests(unittest.TestCase):
 
     def test_raises_exception_if_destination_room_is_full(self):
         self.model.flush()
+        self.dojo.add_fellow("Julia", "julia@dojo.com")
         self.dojo.create_new_office("Yellow")
         new_fellows = ["Mary", "Monica", "Lisa", "Lucy", "Jane", "Jennifer"]
         for fellow in new_fellows:
@@ -108,8 +115,8 @@ class RoomTests(unittest.TestCase):
         self.dojo.create_new_office("Iota")
         self.dojo.create_new_living_space("Zeta")
         with open("people.txt", "w") as test_file:
-            output = "BRUCE WAYNE FELLOW Y\n" \
-                     "BARRY ALLEN STAFF\n"
+            output = "bruce@gotham.com BRUCE WAYNE FELLOW Y\n" \
+                     "allen@nationalcity.com BARRY ALLEN STAFF\n"
             test_file.write(output)
 
         self.dojo.load_people_from_txt_file("people")
@@ -123,4 +130,4 @@ class RoomTests(unittest.TestCase):
 
     def test_raises_exception_if_txt_file_not_found(self):
         with self.assertRaises(FileNotFoundError):
-            self.dojo.load_people_from_txt_file("test_file.txt")
+            self.dojo.load_people_from_txt_file("test_file")
