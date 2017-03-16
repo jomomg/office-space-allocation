@@ -14,12 +14,12 @@ class PersonTests(unittest.TestCase):
 
     def test_add_new_fellow(self):
         initial_fellow_count = len(self.dojo.all_fellows)
-        self.dojo.add_fellow("Harry Potter")
+        self.dojo.add_fellow("Harry Potter", "harry@hogwarts.com")
         new_fellow_count = len(self.dojo.all_fellows)
         self.assertEqual(new_fellow_count - initial_fellow_count, 1, "A new fellow was not added")
 
     def test_add_new_staff(self):
         initial_staff_count = len(self.dojo.all_staff)
-        self.dojo.add_staff("Severus Snape")
+        self.dojo.add_staff("Severus Snape", "hbloodprince@hogwarts.com")
         new_staff_count = len(self.dojo.all_staff)
         self.assertEqual(new_staff_count - initial_staff_count, 1, "A new staff member was not added")

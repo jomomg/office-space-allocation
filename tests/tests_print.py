@@ -79,7 +79,7 @@ class PrintTests(unittest.TestCase):
         self.model.flush()
         persons = "Alpha,Beta,Gamma,Delta"
         for person in persons.split(","):
-            self.dojo.add_fellow(person, wants_accommodation=True)
+            self.dojo.add_fellow(person, person+"@dojo.com", wants_accommodation=True)
         unallocated_persons = self.dojo.print_unallocated()
         expected_output = "STAFF WITHOUT AN OFFICE:\n" \
                           "----------------------------\n" \
