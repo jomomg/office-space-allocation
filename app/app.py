@@ -6,6 +6,8 @@
        app.py print_room <room_name>
        app.py print_allocations [-o=filename]
        app.py print_unallocated [-o=filename]
+       app.py reallocate <email_address> <person_name> <new_room>
+       app.py load_people <filename>
        app.py quit
 
    Options:
@@ -127,6 +129,37 @@ class Arguments(cmd.Cmd):
         filename = arg["-o"]
         if filename:
             the_dojo.print_unallocated(filename)
+
+    @docopt_cmd
+    def do_reallocate(self, arg):
+        """Usage: reallocate <email_address> <person_name> <new_room>"""
+
+        the_dojo = Dojo()
+        print("")
+        person_name = arg["<person_name>"]
+        email = arg["<email_address>"]
+        new_room = arg["<new_room>"]
+        print("")
+        try:
+            the_dojo.reallocate_person(person_name, email, new_room)
+        except ValueError as e:
+            print(e)
+        except OverflowError as e:
+            print(e)
+        print("")
+
+    @docopt_cmd
+    def do_load_people(self, arg):
+        """Usage: load_people <filename>"""
+
+        the_dojo = Dojo()
+        filename = arg["<filename>"]
+        print("")
+        try:
+            the_dojo.load_people_from_txt_file(filename)
+        except FileNotFoundError:
+            print("The filename given was not found")
+        print("")
 
     @docopt_cmd
     def do_quit(self, arg):
