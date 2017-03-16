@@ -53,7 +53,7 @@ class RoomTests(unittest.TestCase):
 
     def test_allocate_living_space(self):
         self.dojo.create_new_living_space("Blue")
-        self.dojo.add_fellow("Test Fellow 2","test@test.com",  wants_accommodation=True)
+        self.dojo.add_fellow("Test Fellow 2", "test@test.com",  wants_accommodation=True)
         fellow = self.model.get_fellow("Test Fellow 2", "test@test.com")
         self.assertEqual(fellow.current_living_space, "Blue")
         living_space_to_check = Model.get_living_space("Blue")
@@ -68,7 +68,7 @@ class RoomTests(unittest.TestCase):
         self.dojo.create_new_office(old_office_name)
         self.dojo.add_fellow("John", "john@john.com")
         self.dojo.create_new_office(new_office_name)
-        self.dojo.reallocate_person("John", "Red")
+        self.dojo.reallocate_person("John", "john@dojo.com", "Red")
         new_fellow = self.model.get_fellow("John", "john@john.com")
         msg = "person was not successfully reallocated"
         self.assertEqual(new_office_name, new_fellow.current_office, msg)
@@ -77,7 +77,7 @@ class RoomTests(unittest.TestCase):
         self.model.flush()
         self.dojo.create_new_office("Green")
         with self.assertRaises(ValueError):
-            self.dojo.reallocate_person("Phillip", "Green")
+            self.dojo.reallocate_person("Phillip", "phillip@dojo.com", "Green")
 
     def test_raises_exception_if_destination_room_is_full(self):
         self.model.flush()
@@ -86,22 +86,22 @@ class RoomTests(unittest.TestCase):
         for fellow in new_fellows:
             self.dojo.add_fellow(fellow, fellow + "@dojo.com")
         with self.assertRaises(OverflowError):
-            self.dojo.reallocate_person("Julia", "Yellow")
+            self.dojo.reallocate_person("Julia", "julia@dojo.com", "Yellow")
 
     def test_cannot_reallocate_staff_to_living_space(self):
         self.model.flush()
         self.dojo.create_new_office("Orange")
         self.dojo.create_new_living_space("Delta")
-        self.dojo.add_staff("James", "james@james.com")
+        self.dojo.add_staff("James", "james@dojo.com")
         with self.assertRaises(ValueError):
-             self.dojo.reallocate_person("James", "Delta")
+            self.dojo.reallocate_person("James", "james@dojo.com", "Delta")
 
     def test_raises_exception_if_destination_room_is_non_existent(self):
         self.model.flush()
         self.dojo.create_new_office("Violet")
-        self.dojo.add_fellow("David", "david@david.com")
+        self.dojo.add_fellow("David", "david@dojo.com")
         with self.assertRaises(ValueError):
-            self.dojo.reallocate_person("David", "Cyan")
+            self.dojo.reallocate_person("David", "david@dojo.com", "Cyan")
 
     def test_loads_people_from_txt_file(self):
         self.model.flush()
