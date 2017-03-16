@@ -41,10 +41,10 @@ class RoomTests(unittest.TestCase):
 
     def test_allocate_office(self):
         self.dojo.create_new_office("Red")
-        self.dojo.add_fellow("Test Fellow")
-        self.dojo.add_staff("Test Staff")
-        fellow = self.model.get_fellow("Test Fellow")
-        staff = self.model.get_staff("Test Staff")
+        self.dojo.add_fellow("Test Fellow", "fellow@fellow.com")
+        self.dojo.add_staff("Test Staff", "staff@staff.com")
+        fellow = self.model.get_fellow("Test Fellow", "fellow@fellow.com")
+        staff = self.model.get_staff("Test Staff", "staff@staff.com")
         self.assertEqual((fellow.current_office, staff.current_office), ("Red", "Red"),
                          "Office allocation not successful")
         office_to_check = Model.get_office("Red")
@@ -53,23 +53,23 @@ class RoomTests(unittest.TestCase):
 
     def test_allocate_living_space(self):
         self.dojo.create_new_living_space("Blue")
-        self.dojo.add_fellow("Test Fellow 2", wants_accommodation=True)
-        fellow = self.model.get_fellow("Test Fellow 2")
+        self.dojo.add_fellow("Test Fellow 2","test@test.com",  wants_accommodation=True)
+        fellow = self.model.get_fellow("Test Fellow 2", "test@test.com")
         self.assertEqual(fellow.current_living_space, "Blue")
         living_space_to_check = Model.get_living_space("Blue")
         self.assertEqual(living_space_to_check.current_capacity, 1)
 
     # Reallocation tests
 
-    def test_reallocation(self):
+    def test_reallocation_successful(self):
         self.model.flush()
         old_office_name = "Blue"
         new_office_name = "Red"
         self.dojo.create_new_office(old_office_name)
-        self.dojo.add_fellow("John")
+        self.dojo.add_fellow("John", "john@john.com")
         self.dojo.create_new_office(new_office_name)
         self.dojo.reallocate_person("John", "Red")
-        new_fellow = self.model.get_fellow("John")
+        new_fellow = self.model.get_fellow("John", "john@john.com")
         msg = "person was not successfully reallocated"
         self.assertEqual(new_office_name, new_fellow.current_office, msg)
 
@@ -82,9 +82,9 @@ class RoomTests(unittest.TestCase):
     def test_raises_exception_if_destination_room_is_full(self):
         self.model.flush()
         self.dojo.create_new_office("Yellow")
-        new_fellows = ["Mary", "Monica", "Lisa", "Lucy", "Jane"]
+        new_fellows = ["Mary", "Monica", "Lisa", "Lucy", "Jane", "Jennifer"]
         for fellow in new_fellows:
-            self.dojo.add_fellow(fellow)
+            self.dojo.add_fellow(fellow, fellow + "@dojo.com")
         with self.assertRaises(OverflowError):
             self.dojo.reallocate_person("Julia", "Yellow")
 
@@ -92,14 +92,14 @@ class RoomTests(unittest.TestCase):
         self.model.flush()
         self.dojo.create_new_office("Orange")
         self.dojo.create_new_living_space("Delta")
-        self.dojo.add_staff("James")
+        self.dojo.add_staff("James", "james@james.com")
         with self.assertRaises(ValueError):
              self.dojo.reallocate_person("James", "Delta")
 
     def test_raises_exception_if_destination_room_is_non_existent(self):
         self.model.flush()
         self.dojo.create_new_office("Violet")
-        self.dojo.add_fellow("David")
+        self.dojo.add_fellow("David", "david@david.com")
         with self.assertRaises(ValueError):
             self.dojo.reallocate_person("David", "Cyan")
 
@@ -113,8 +113,8 @@ class RoomTests(unittest.TestCase):
             test_file.write(output)
 
         self.dojo.load_people_from_txt_file("people")
-        new_fellow = self.model.get_fellow("Bruce Wayne")
-        new_staff = self.model.get_staff("Barry Allen")
+        new_fellow = self.model.get_fellow("Bruce Wayne", "bruce@gotham.com")
+        new_staff = self.model.get_staff("Barry Allen", "allen@nationalcity.com")
         self.assertTrue(new_fellow)
         self.assertTrue(new_staff)
         self.assertEqual("Iota", new_staff.current_office)
