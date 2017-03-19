@@ -8,6 +8,8 @@
        app.py print_unallocated [-o=filename]
        app.py reallocate <email_address> <person_name> <new_room>
        app.py load_people <filename>
+       app.py save_state [--db=sqlite_database]
+       app.py load_state <sqlite_database>
        app.py quit
 
    Options:
@@ -165,6 +167,28 @@ class Arguments(cmd.Cmd):
     def do_quit(self, arg):
         """Usage: quit"""
         exit("You've quit the application")
+
+    @docopt_cmd
+    def do_save_state(self, arg):
+        """Usage: save_state [--db=sqlite_database]"""
+
+        the_dojo = Dojo()
+        print()
+        if arg["--db"]:
+            print(the_dojo.save_state(arg["--db"]))
+        else:
+            the_dojo.save_state()
+        print()
+
+    @docopt_cmd
+    def load_state(self, arg):
+        """Usage: load_state <sqlite_database>"""
+
+        the_dojo = Dojo()
+        print()
+        database = arg["<sqlite_database>"]
+        print(the_dojo.load_state(database))
+        print()
 
 
 def main():
