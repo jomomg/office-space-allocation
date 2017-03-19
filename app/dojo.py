@@ -2,7 +2,7 @@ import itertools
 import random
 
 from app import person, room
-from app.models import Model
+import app.models as md
 
 
 MAX_OFFICE_CAP = 6
@@ -16,12 +16,11 @@ class Dojo:
 
     def __init__(self):
         """Instantiates the Model class to allow for storage"""
-        self.model = Model()
+        self.model = md.Model()
 
     @staticmethod
     def allocate_office_space(person_name, email, person_type):
         """ This methods randomly allocates an office to a fellow or staff.
-
             Returns True if successful and False if not
         """
 
@@ -29,7 +28,7 @@ class Dojo:
         random.seed()
 
         # return the list of available offices
-        all_offices = Model.get_list("offices")
+        all_offices = md.Model.get_list("offices")
         # return a list of offices with capacity to spare
         non_full_offices = [office
                             for office in all_offices
@@ -39,14 +38,14 @@ class Dojo:
 
         if person_type == "fellow":
             random_office = random.choice(non_full_offices)
-            fellow = Model.get_fellow(person_name, email)
+            fellow = md.Model.get_fellow(person_name, email)
             random_office.current_capacity += 1
             fellow.current_office = random_office.name
             return successful
 
         elif person_type == "staff":
             random_office = random.choice(non_full_offices)
-            staff = Model.get_staff(person_name, email)
+            staff = md.Model.get_staff(person_name, email)
             random_office.current_capacity += 1
             staff.current_office = random_office.name
             return successful
@@ -57,7 +56,6 @@ class Dojo:
     @staticmethod
     def allocate_living_space(fellow_name, email):
         """ This methods randomly allocates a living space to a fellow or staff.
-
             Returns True if successful and False if not
         """
 
@@ -65,7 +63,7 @@ class Dojo:
         random.seed()
 
         # return a list of available living spaces
-        all_living_spaces = Model.get_list("living_spaces")
+        all_living_spaces = md.Model.get_list("living_spaces")
         # return a list of living spaces with capacity to spare
         non_full_living_spaces = [living_space
                                   for living_space in all_living_spaces
@@ -74,7 +72,7 @@ class Dojo:
         if not non_full_living_spaces:
             raise ValueError("There are no living spaces to allocate")
         random_living_space = random.choice(non_full_living_spaces)
-        fellow = Model.get_fellow(fellow_name, email)
+        fellow = md.Model.get_fellow(fellow_name, email)
         random_living_space.current_capacity += 1
         fellow.current_living_space = random_living_space.name
 
@@ -87,8 +85,8 @@ class Dojo:
         new_office = room.Office(name)
 
         # get the existing offices
-        offices = Model.get_list("offices")
-        living_spaces = Model.get_list("living_spaces")
+        offices = md.Model.get_list("offices")
+        living_spaces = md.Model.get_list("living_spaces")
         # check whether the office already exists, if it does raise an exception
         similar_office = [office for office in offices if office.name == name]
         similar_living_space = [ls for ls in living_spaces if ls.name == name]
@@ -102,8 +100,8 @@ class Dojo:
 
         successful = True
         new_living_space = room.LivingSpace(name)
-        living_spaces = Model.get_list("living_spaces")
-        offices = Model.get_list("offices")
+        living_spaces = md.Model.get_list("living_spaces")
+        offices = md.Model.get_list("offices")
         # check whether the living space already exists, if it does raise an exception
         similar_living_space = [ls for ls in living_spaces if ls.name == name]
         similar_office = [office for office in offices if office.name == name]
@@ -117,6 +115,11 @@ class Dojo:
         """ Adds a new fellow """
 
         new_fellow = person.Fellow(name, email)
+        fellows = self.model.get_list("fellows")
+        similar = [fellow for fellow in fellows if fellow.email_address == email]
+        if similar:
+            return "The email address provided already exists"
+
         self.model.update(new_fellow, "fellows")
         print("Fellow {} has been successfully added".format(new_fellow.name))
         try:
@@ -138,6 +141,11 @@ class Dojo:
         """ Adds a new member of staff """
 
         new_staff = person.Staff(name, email)
+        staff = self.model.get_list("staff")
+        similar = [staff_member for staff_member in staff if staff_member.email_address == email]
+        if similar:
+            return "The email address provided already exists"
+
         self.model.update(new_staff, "staff")
         print("Staff {} has been successfully added".format(new_staff.name))
         try:
@@ -288,9 +296,9 @@ class Dojo:
                 else:
                     person_to_reallocate.current_living_space = destination_room.name
 
-        print("{} {} has been reallocated to the {} {}".format(type(person_to_reallocate),
+        print("{} {} has been reallocated to the {} {}".format(type(person_to_reallocate).__name__,
                                                                person_to_reallocate.name,
-                                                               type(destination_room),
+                                                               type(destination_room).__name__,
                                                                destination_room.name))
 
     def load_people_from_txt_file(self, filename):
@@ -328,23 +336,114 @@ class Dojo:
         for staff_member in staff:
             self.add_staff(staff_member["name"], staff_member["email"])
 
+    def update_database(self, session):
+        success = True
+        fellows = self.model.get_list("fellows")
+        for fellow in fellows:
+            fellow_to_add = md.Fellow(name=fellow.name,
+                                      email=fellow.email_address,
+                                      current_office=fellow.current_office,
+                                      current_living_space=fellow.current_living_space)
+            session.add(fellow_to_add)
+            session.commit()
+
+        staff = self.model.get_list("staff")
+        for staff_member in staff:
+            staff_to_add = md.Staff(name=staff_member.name,
+                                    email=staff_member.email_address,
+                                    current_office=staff_member.current_office)
+            session.add(staff_to_add)
+            session.commit()
+
+        offices = self.model.get_list("offices")
+        for office in offices:
+            office_to_add = md.Office(name=office.name,
+                                      current_capacity=office.current_capacity)
+            session.add(office_to_add)
+            session.commit()
+
+        living_spaces = self.model.get_list("living_spaces")
+        for living_space in living_spaces:
+            l_space = md.LivingSpace(name=living_space.name,
+                                     current_capacity=living_space.current_capacity)
+            session.add(l_space)
+            session.commit()
+
+        return success
+
+    def load_from_database(self, session):
+        success = True
+        all_fellows = session.query(md.Fellow).all()
+        print(all_fellows)
+        for fellow in all_fellows:
+
+            new_fellow = person.Fellow(fellow.name, fellow.email)
+            new_fellow.current_office = fellow.current_office
+            new_fellow.current_living_space = fellow.current_living_space
+            self.model.update(new_fellow, "fellows")
+
+        all_staff = session.query(md.Staff).all()
+        for staff in all_staff:
+            new_staff = person.Staff(staff.name, staff.email)
+            new_staff.current_office = staff.current_office
+            self.model.update(new_staff, "staff")
+
+        all_offices = session.query(md.Office).all()
+        for office in all_offices:
+            new_office = room.Office(office.name)
+            new_office.current_capacity = office.current_capacity
+            self.model.update(new_office, "offices")
+
+        all_living_spaces = session.query(md.LivingSpace).all()
+        for living_space in all_living_spaces:
+            new_living = room.LivingSpace(living_space.name)
+            new_living.current_capacity = living_space.current_capacity
+            self.model.update(new_living, "living_spaces")
+
+        return success
+
+    def save_state(self, database="default"):
+        """Saves all the data to a database"""
+
+        engine = md.create_engine("sqlite:///"+ database + ".db")
+        md.Base.metadata.bind = engine
+        md.Base.metadata.create_all(engine)
+        DB_session = md.sessionmaker(bind=engine)
+        session = DB_session()
+
+        if self.update_database(session):
+            session.close()
+            return "Successfully saved data to database {}".format(database)
+
+    def load_state(self, database):
+        """Loads the data stored in the database into the program"""
+
+        engine = md.create_engine("sqlite:///"+ database + ".db")
+        md.Base.metadata.bind = engine
+        DB_session = md.sessionmaker(bind=engine)
+        session = DB_session()
+
+        if self.load_from_database(session):
+            session.close()
+            return "Successfully loaded data from database {}".format(database)
+
     @property
     def all_fellows(self):
-        """ Returns a list containing all the fellows added """
-        return Model.get_list("fellows")
+        """Returns a list containing all the fellows added"""
+        return md.Model.get_list("fellows")
 
     @property
     def all_staff(self):
-        """ Returns a list containing all added members of staff"""
-        return Model.get_list("staff")
+        """Returns a list containing all added members of staff"""
+        return md.Model.get_list("staff")
 
     @property
     def all_offices(self):
-        """ Return a list containing all the offices created """
-        return Model.get_list("offices")
+        """Return a list containing all the offices created """
+        return md.Model.get_list("offices")
 
     @property
     def all_living_spaces(self):
-        """ Return a list containing all the living spaces created """
-        return Model.get_list("living_spaces")
+        """Return a list containing all the living spaces created """
+        return md.Model.get_list("living_spaces")
 
