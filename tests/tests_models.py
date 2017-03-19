@@ -31,15 +31,27 @@ class ModelTests(unittest.TestCase):
         self.assertEqual(("Peter", "Paul"), (fellow.name, staff.name), msg)
         os.remove("default.db")
 
-    def test_successfully_creates_and_loads_specified_database_file(self):
+    def test_successfully_creates_and_loads_from_user_supplied_db_file(self):
         self.model.flush()
         self.dojo.create_new_office("Cyan")
         self.dojo.add_fellow("Abel", "abel@dojo.com")
+
         self.dojo.save_state("test_db")
         self.model.flush()
         self.dojo.load_state("test_db")
+
         fellow = self.model.get_fellow("Abel", "abel@dojo.com")
         office = self.model.get_office("Cyan")
         self.assertEqual("Abel", fellow.name)
         self.assertEqual("Cyan", office.name)
         os.remove("test_db.db")
+
+    def test_raises_error_if_specified_database_file_is_nonexistent(self):
+        self.model.flush()
+        self.dojo.add_fellow("Thomas", "thomas@dojo.com")
+
+        self.dojo.save_state()
+        self.model.flush()
+        actual_err_msg = self.dojo.load_state("non_existent_db")
+        expected_err_msg = "The specified database does not exist"
+        self.assertEqual(expected_err_msg, actual_err_msg)
