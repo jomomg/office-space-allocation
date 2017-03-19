@@ -1,3 +1,8 @@
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
+
 """lists for storing data"""
 fellows = []
 staff = []
@@ -92,5 +97,49 @@ class Model:
         self.staff.clear()
         self.offices.clear()
         self.living_spaces.clear()
+
+
+class Fellow(Base):
+    """The fellows table"""
+
+    __tablename__ = "fellow"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    current_office = Column(String)
+    current_living_space = Column(String)
+
+
+class Staff(Base):
+    """The staff table"""
+
+    __tablename__ = "staff"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    current_office = Column(String)
+
+
+class Office(Base):
+    """The Office table definition"""
+
+    __tablename__ = "offices"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    current_capacity = Column(Integer)
+
+
+class LivingSpace(Base):
+    """The living space table definition"""
+
+    __tablename__ = "living_spaces"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    current_capacity = Column(Integer)
+
 
 
