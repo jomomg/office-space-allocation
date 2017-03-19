@@ -1,7 +1,10 @@
 import itertools
 import random
+import os
 
 from app import person, room
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 import app.models as md
 
 
@@ -405,10 +408,10 @@ class Dojo:
     def save_state(self, database="default"):
         """Saves all the data to a database"""
 
-        engine = md.create_engine("sqlite:///"+ database + ".db")
+        engine = create_engine("sqlite:///"+ database + ".db")
         md.Base.metadata.bind = engine
         md.Base.metadata.create_all(engine)
-        DB_session = md.sessionmaker(bind=engine)
+        DB_session = sessionmaker(bind=engine)
         session = DB_session()
 
         if self.update_database(session):
@@ -418,9 +421,11 @@ class Dojo:
     def load_state(self, database):
         """Loads the data stored in the database into the program"""
 
-        engine = md.create_engine("sqlite:///"+ database + ".db")
+        if not os.path.exists(database + ".db"):
+            return "The specified database does not exist"
+        engine = create_engine("sqlite:///"+ database + ".db")
         md.Base.metadata.bind = engine
-        DB_session = md.sessionmaker(bind=engine)
+        DB_session = sessionmaker(bind=engine)
         session = DB_session()
 
         if self.load_from_database(session):
