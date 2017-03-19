@@ -408,11 +408,11 @@ class Dojo:
     def save_state(self, database="default"):
         """Saves all the data to a database"""
 
-        engine = create_engine("sqlite:///"+ database + ".db")
+        engine = create_engine("sqlite:///" + database + ".db")
         md.Base.metadata.bind = engine
         md.Base.metadata.create_all(engine)
-        DB_session = sessionmaker(bind=engine)
-        session = DB_session()
+        db_session = sessionmaker(bind=engine)
+        session = db_session()
 
         if self.update_database(session):
             session.close()
@@ -423,10 +423,10 @@ class Dojo:
 
         if not os.path.exists(database + ".db"):
             return "The specified database does not exist"
-        engine = create_engine("sqlite:///"+ database + ".db")
+        engine = create_engine("sqlite:///" + database + ".db")
         md.Base.metadata.bind = engine
-        DB_session = sessionmaker(bind=engine)
-        session = DB_session()
+        db_session = sessionmaker(bind=engine)
+        session = db_session()
 
         if self.load_from_database(session):
             session.close()
