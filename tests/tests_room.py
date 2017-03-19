@@ -34,14 +34,16 @@ class RoomTests(unittest.TestCase):
     def test_does_not_allow_duplicate_offices(self):
         self.model.flush()
         self.dojo.create_new_office("Test")
-        with self.assertRaises(ValueError):
-            self.dojo.create_new_office("Test")
+        expected_err_msg = "An office or living space 'Test' already exists"
+        actual_err_msg = self.dojo.create_new_office("Test")
+        self.assertEqual(expected_err_msg, actual_err_msg)
 
     def test_does_not_allow_duplicate_living_spaces(self):
         self.model.flush()
         self.dojo.create_new_living_space("Test")
-        with self.assertRaises(ValueError):
-            self.dojo.create_new_living_space("Test")
+        expected_err_msg = "An office or living space 'Test' already exists"
+        actual_err_msg = self.dojo.create_new_office("Test")
+        self.assertEqual(expected_err_msg, actual_err_msg)
 
     def test_allocate_office(self):
         self.model.flush()
