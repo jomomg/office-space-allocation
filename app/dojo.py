@@ -43,6 +43,7 @@ class Dojo:
             fellow = md.Model.get_fellow(person_name, email)
             random_office.current_capacity += 1
             fellow.current_office = random_office.name
+            random_office.occupants.append("{} {}".format(fellow.email_address, fellow.name))
             return "Fellow {} has been allocated the office {}".format(fellow.name, fellow.current_office)
 
         elif person_type == "staff":
@@ -50,7 +51,8 @@ class Dojo:
             staff = md.Model.get_staff(person_name, email)
             random_office.current_capacity += 1
             staff.current_office = random_office.name
-            return "Staff {} has been allocated the living space {}".format(staff.name, staff.current_office)
+            random_office.occupants.append("{} {}".format(staff.email_address, staff.name))
+            return "Staff {} has been allocated the office {}".format(staff.name, staff.current_office)
 
         else:
             return "Unable to allocate an office"
@@ -73,6 +75,7 @@ class Dojo:
         fellow = md.Model.get_fellow(fellow_name, email)
         random_living_space.current_capacity += 1
         fellow.current_living_space = random_living_space.name
+        random_living_space.occupants.append("{} {}".format(fellow.email_address, fellow.name))
         return "Fellow {} has been allocated the living space {}".format(fellow.name, fellow.current_living_space)
 
     def create_new_office(self, name):
@@ -132,34 +135,20 @@ class Dojo:
             print("Staff {} has been successfully added".format(new_staff.name))
             print(self.allocate_office_space(new_staff.name, email, person_type="staff"))
 
-    def get_persons_by_room(self, room):
-        """Returns a list of the people in the given room"""
+    def print_persons_by_room(self, room):
+        """Prints the people in the given room to screen"""
 
         rooms = self.model.get_list("offices") + self.model.get_list("living_spaces")
         if room not in [room.name for room in rooms]:
-            raise ValueError("The requested room does not exist")
-        fellows = self.model.get_list("fellows")
-        staff = self.model.get_list("staff")
-        persons = staff + fellows
-        persons_in_room = []
-        for person in persons:
-            if person.current_office == room or person.current_living_space == room:
-                persons_in_room.append("{} {}".format(person.email_address, person.name))
-        return persons_in_room
+            return "The room you specified was not found"
 
-    def print_persons_by_room(self, room_name):
-        """Prints the people in the given room to screen"""
+        office = self.model.get_office(room)
+        living_space = self.model.get_living_space(room)
 
-        try:
-            persons_in_given_room = self.get_persons_by_room(room_name)
-            is_office = self.model.get_office(room_name)
-            is_living_space = self.model.get_living_space(room_name)
-            if is_office:
-                return "(OFFICE) {}:\n".format(room_name.upper()) + ",".join(persons_in_given_room)
-            elif is_living_space:
-                return "(LIVING SPACE) {}:\n".format(room_name.upper()) + ",".join(persons_in_given_room)
-        except ValueError as e:
-            print(e)
+        if office:
+            return "(OFFICE) {}:\n".format(room.upper()) + ",".join(office.occupants)
+        elif living_space:
+            return "(LIVING SPACE) {}:\n".format(room.upper()) + ",".join(living_space.occupants)
 
     def print_allocations(self, filename=None):
         """Prints all the room allocations to the screen or to a txt file"""
@@ -182,7 +171,7 @@ class Dojo:
                 rooms[("OFFICE", person.current_office)] += ["{} {}".format(person.email_address, person.name)]
 
         if not rooms:
-            raise ValueError("No allocations have been made".upper())
+            return "No allocations have been made".upper()
 
         if filename:
             with open(filename + ".txt", "w") as file:
@@ -253,30 +242,40 @@ class Dojo:
 
         person_to_reallocate = self.model.get_fellow(name, email) or self.model.get_staff(name, email)
         if not person_to_reallocate:
-            raise ValueError("The person specified was not found")
+            return "The person specified was not found"
+        source_room = self.model.get_office(person_to_reallocate.current_office) or \
+                      self.model.get_living_space(person_to_reallocate.current_living_space)
         destination_room = self.model.get_office(new_room) or self.model.get_living_space(new_room)
         if not destination_room:
-            raise ValueError("The destination room was not found")
+            return "The destination room was not found"
 
         if isinstance(destination_room, room.Office):
             if destination_room.current_capacity >= MAX_OFFICE_CAP:
-                raise OverflowError("The destination room, office {}, is full".format(destination_room))
+                return "The destination room, office {}, is full".format(destination_room.name)
             else:
                 person_to_reallocate.current_office = destination_room.name
+                destination_room.occupants.append("{} {}".format(person_to_reallocate.email_address,
+                                                                 person_to_reallocate.name))
 
         elif isinstance(destination_room, room.LivingSpace):
             if destination_room.current_capacity >= MAX_LIVING_SPACE_CAP:
-                raise OverflowError("The destination room, living space {}, is full".format(destination_room))
+                return "The destination room, living space {}, is full".format(destination_room.name)
             else:
                 if isinstance(person_to_reallocate, person.Staff):
-                    raise ValueError("Cannot reallocate staff to a living space")
+                    return "Cannot reallocate staff to a living space"
                 else:
                     person_to_reallocate.current_living_space = destination_room.name
+                    destination_room.occupants.append("{} {}".format(person_to_reallocate.email_address,
+                                                                     person_to_reallocate.name))
 
-        print("{} {} has been reallocated to the {} {}".format(type(person_to_reallocate).__name__,
-                                                               person_to_reallocate.name,
-                                                               type(destination_room).__name__,
-                                                               destination_room.name))
+        if source_room:
+            source_room.occupants.remove("{} {}".format(person_to_reallocate.email_address,
+                                                        person_to_reallocate.name))
+
+        return "{} {} has been reallocated to the {} {}".format(type(person_to_reallocate).__name__,
+                                                                person_to_reallocate.name,
+                                                                type(destination_room).__name__,
+                                                                destination_room.name)
 
     def load_people_from_txt_file(self, filename):
         """Adds staff and fellows by taking the input to a txt file"""
@@ -424,4 +423,3 @@ class Dojo:
     def all_living_spaces(self):
         """Return a list containing all the living spaces created """
         return md.Model.get_list("living_spaces")
-
