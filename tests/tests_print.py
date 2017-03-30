@@ -10,16 +10,17 @@ class PrintTests(unittest.TestCase):
         self.dojo = Dojo()
         self.model = Model()
 
-    def test_raises_exception_on_non_existent_room(self):
-        with self.assertRaises(ValueError):
-            self.dojo.get_persons_by_room("Nonexistent")
+    def test_raises_error_on_non_existent_room(self):
+        expected_response = "The room you specified was not found"
+        actual_response = self.dojo.print_persons_by_room("Nonexistent")
+        self.assertEqual(expected_response, actual_response)
 
     def test_print_occupants_of_given_living_space(self):
         self.model.flush()
         self.dojo.create_new_living_space("Chui")
         person = "Harry"
         self.dojo.add_fellow(person, person + "@dojo.com", wants_accommodation=True)
-        persons_in_living_space = self.dojo.print_persons_by_room(room_name="Chui")
+        persons_in_living_space = self.dojo.print_persons_by_room(room="Chui")
         expected_output = "(LIVING SPACE) CHUI:\n" \
                           "Harry@dojo.com Harry"
         msg = "Could not get the occupants of the given room"
@@ -30,7 +31,7 @@ class PrintTests(unittest.TestCase):
         self.dojo.create_new_office("Simba")
         person = "Hermione"
         self.dojo.add_fellow(person, person + "@dojo.com")
-        persons_in_office = self.dojo.print_persons_by_room(room_name="Simba")
+        persons_in_office = self.dojo.print_persons_by_room(room="Simba")
         expected_output = "(OFFICE) SIMBA:\n" \
                           "Hermione@dojo.com Hermione"
         msg = "Could not get the occupants of the given room"
