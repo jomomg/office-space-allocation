@@ -5,6 +5,7 @@ class Room:
     def __init__(self):
         self.name = None
         self.current_capacity = 0
+        self.occupants = []
 
 
 class Office(Room):
@@ -21,4 +22,3 @@ class LivingSpace(Room):
     def __init__(self, living_space_name):
         Room.__init__(self)
         self.name = living_space_name
-
