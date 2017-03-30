@@ -104,14 +104,11 @@ class Arguments(cmd.Cmd):
         """
         the_dojo = Dojo()
         print()
-        try:
-            print(the_dojo.print_allocations())
-            filename = arg["-o"]
-            if filename:
-                the_dojo.print_allocations(filename)
-        except ValueError as e:
-            print(e)
-            print()
+        print(the_dojo.print_allocations())
+        filename = arg["-o"]
+        if filename:
+            the_dojo.print_allocations(filename)
+        print()
 
     @docopt_cmd
     def do_print_unallocated(self, arg):
@@ -137,12 +134,7 @@ class Arguments(cmd.Cmd):
         email = arg["<email_address>"]
         new_room = arg["<new_room>"]
         print()
-        try:
-            the_dojo.reallocate_person(person_name, email, new_room)
-        except ValueError as e:
-            print(e)
-        except OverflowError as e:
-            print(e)
+        print(the_dojo.reallocate_person(person_name, email, new_room))
         print()
 
     @docopt_cmd
