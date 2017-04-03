@@ -34,14 +34,16 @@ class RoomTests(unittest.TestCase):
     def test_does_not_allow_duplicate_offices(self):
         self.model.flush()
         self.dojo.create_new_office("Test")
-        with self.assertRaises(ValueError):
-            self.dojo.create_new_office("Test")
+        expected_err_msg = "An office or living space 'Test' already exists"
+        actual_err_msg = self.dojo.create_new_office("Test")
+        self.assertEqual(expected_err_msg, actual_err_msg)
 
     def test_does_not_allow_duplicate_living_spaces(self):
         self.model.flush()
         self.dojo.create_new_living_space("Test")
-        with self.assertRaises(ValueError):
-            self.dojo.create_new_living_space("Test")
+        expected_err_msg = "An office or living space 'Test' already exists"
+        actual_err_msg = self.dojo.create_new_office("Test")
+        self.assertEqual(expected_err_msg, actual_err_msg)
 
     def test_allocate_office(self):
         self.model.flush()
@@ -79,36 +81,40 @@ class RoomTests(unittest.TestCase):
         msg = "person was not successfully reallocated"
         self.assertEqual(new_office_name, new_fellow.current_office, msg)
 
-    def test_raises_exception_if_person_not_found(self):
+    def test_raises_error_if_person_not_found(self):
         self.model.flush()
         self.dojo.create_new_office("Green")
-        with self.assertRaises(ValueError):
-            self.dojo.reallocate_person("Phillip", "phillip@dojo.com", "Green")
+        expected_err_msg = "The person specified was not found"
+        actual_err_msg = self.dojo.reallocate_person("Phillip", "phillip@dojo.com", "Green")
+        self.assertEqual(expected_err_msg, actual_err_msg)
 
-    def test_raises_exception_if_destination_room_is_full(self):
+    def test_raises_error_if_destination_room_is_full(self):
         self.model.flush()
         self.dojo.add_fellow("Julia", "julia@dojo.com")
         self.dojo.create_new_office("Yellow")
         new_fellows = ["Mary", "Monica", "Lisa", "Lucy", "Jane", "Jennifer"]
         for fellow in new_fellows:
             self.dojo.add_fellow(fellow, fellow + "@dojo.com")
-        with self.assertRaises(OverflowError):
-            self.dojo.reallocate_person("Julia", "julia@dojo.com", "Yellow")
+        expected_err_msg = "The destination room, office Yellow, is full"
+        actual_err_msg = self.dojo.reallocate_person("Julia", "julia@dojo.com", "Yellow")
+        self.assertEqual(expected_err_msg, actual_err_msg)
 
     def test_cannot_reallocate_staff_to_living_space(self):
         self.model.flush()
         self.dojo.create_new_office("Orange")
         self.dojo.create_new_living_space("Delta")
         self.dojo.add_staff("James", "james@dojo.com")
-        with self.assertRaises(ValueError):
-            self.dojo.reallocate_person("James", "james@dojo.com", "Delta")
+        expected_err_msg = "Cannot reallocate staff to a living space"
+        actual_err_msg = self.dojo.reallocate_person("James", "james@dojo.com", "Delta")
+        self.assertEqual(expected_err_msg, actual_err_msg)
 
-    def test_raises_exception_if_destination_room_is_non_existent(self):
+    def test_raises_error_if_destination_room_is_non_existent(self):
         self.model.flush()
         self.dojo.create_new_office("Violet")
         self.dojo.add_fellow("David", "david@dojo.com")
-        with self.assertRaises(ValueError):
-            self.dojo.reallocate_person("David", "david@dojo.com", "Cyan")
+        expected_err_msg = "The destination room was not found"
+        actual_err_msg = self.dojo.reallocate_person("David", "david@dojo.com", "Cyan")
+        self.assertEqual(expected_err_msg, actual_err_msg)
 
     def test_loads_people_from_txt_file(self):
         self.model.flush()

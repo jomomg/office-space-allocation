@@ -1,13 +1,15 @@
 """Office Space Allocation app v0.0
 
    Usage:
-       app.py create_room <room_type> <room_name>
+       app.py create_room (office|living_space) <room_name>
        app.py add_person (fellow|staff) <email_address> <person_name>  [-y]
        app.py print_room <room_name>
        app.py print_allocations [-o=filename]
        app.py print_unallocated [-o=filename]
        app.py reallocate <email_address> <person_name> <new_room>
        app.py load_people <filename>
+       app.py save_state [--db=sqlite_database]
+       app.py load_state <sqlite_database>
        app.py quit
 
    Options:
@@ -45,23 +47,17 @@ class Arguments(cmd.Cmd):
 
     @docopt_cmd
     def do_create_room(self, arg):
-        """Usage: create_room <room_type> <room_name>..."""
+        """Usage: create_room (office|living_space) <room_name>..."""
 
-        print("")
-        try:
-            if arg["<room_type>"] == "office":
-                for room_name in arg["<room_name>"]:
-                    new_office = Dojo().create_new_office(room_name)
-                    if new_office:
-                        print("An office called '{}' has been successfully created".format(room_name))
-            elif arg["<room_type>"] == "living_space":
-                for room_name in arg["<room_name>"]:
-                    new_living_space = Dojo().create_new_living_space(room_name)
-                    if new_living_space:
-                        print("A living space called '{}' has been successfully created".format(room_name))
-        except ValueError as e:
-            print(e)
-        print("")
+        print()
+        the_dojo = Dojo()
+        if arg["office"]:
+            for room_name in arg["<room_name>"]:
+                print(the_dojo.create_new_office(room_name))
+        elif arg["living_space"]:
+            for room_name in arg["<room_name>"]:
+                print(the_dojo.create_new_living_space(room_name))
+        print()
 
     @docopt_cmd
     def do_add_person(self, arg):
@@ -71,7 +67,7 @@ class Arguments(cmd.Cmd):
                -y    wants accommodation
         """
 
-        print("")
+        print()
         the_dojo = Dojo()
         person_name = " ".join(arg["<person_name>"])
         email = arg["<email_address>"]
@@ -87,15 +83,17 @@ class Arguments(cmd.Cmd):
 
         elif arg["staff"]:
             the_dojo.add_staff(person_name, email)
-        print("")
+        print()
 
     @docopt_cmd
     def do_print_room(self, arg):
         """Usage: print_room <room_name>"""
+
         the_dojo = Dojo()
         room_name = arg["<room_name>"]
-        print("")
+        print()
         print(the_dojo.print_persons_by_room(room_name))
+        print()
 
     @docopt_cmd
     def do_print_allocations(self, arg):
@@ -105,15 +103,12 @@ class Arguments(cmd.Cmd):
                -o=filename    print information to txt file
         """
         the_dojo = Dojo()
-        print("")
-        try:
-            print(the_dojo.print_allocations())
-            filename = arg["-o"]
-            if filename:
-                the_dojo.print_allocations(filename)
-        except ValueError as e:
-            print(e)
-            print("")
+        print()
+        print(the_dojo.print_allocations())
+        filename = arg["-o"]
+        if filename:
+            the_dojo.print_allocations(filename)
+        print()
 
     @docopt_cmd
     def do_print_unallocated(self, arg):
@@ -132,21 +127,15 @@ class Arguments(cmd.Cmd):
 
     @docopt_cmd
     def do_reallocate(self, arg):
-        """Usage: reallocate <email_address> <person_name> <new_room>"""
+        """Usage: reallocate <new_room> <email_address> <person_name>... """
 
         the_dojo = Dojo()
-        print("")
-        person_name = arg["<person_name>"]
+        person_name = " ".join(arg["<person_name>"])
         email = arg["<email_address>"]
         new_room = arg["<new_room>"]
-        print("")
-        try:
-            the_dojo.reallocate_person(person_name, email, new_room)
-        except ValueError as e:
-            print(e)
-        except OverflowError as e:
-            print(e)
-        print("")
+        print()
+        print(the_dojo.reallocate_person(person_name, email, new_room))
+        print()
 
     @docopt_cmd
     def do_load_people(self, arg):
@@ -165,6 +154,28 @@ class Arguments(cmd.Cmd):
     def do_quit(self, arg):
         """Usage: quit"""
         exit("You've quit the application")
+
+    @docopt_cmd
+    def do_save_state(self, arg):
+        """Usage: save_state [--db=sqlite_database]"""
+
+        the_dojo = Dojo()
+        print()
+        if arg["--db"]:
+            print(the_dojo.save_state(arg["--db"]))
+        else:
+            print(the_dojo.save_state())
+        print()
+
+    @docopt_cmd
+    def do_load_state(self, arg):
+        """Usage: load_state <sqlite_database>"""
+
+        the_dojo = Dojo()
+        print()
+        database = arg["<sqlite_database>"]
+        print(the_dojo.load_state(database))
+        print()
 
 
 def main():
